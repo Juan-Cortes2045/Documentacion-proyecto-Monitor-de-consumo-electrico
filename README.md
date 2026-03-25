@@ -1,4 +1,4 @@
-# Monitor de Conusmo Electrico
+# Monitor de Consumo Electrico
 
 ## Integrantes:
 - Juan Esteban Cortes Parra
