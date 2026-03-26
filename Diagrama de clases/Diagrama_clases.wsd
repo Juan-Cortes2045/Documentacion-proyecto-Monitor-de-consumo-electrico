@@ -1,0 +1,93 @@
+@startuml diagrama_clases
+
+abstract class User{
+    -idUser:String 
+    -name:String
+    -email:String 
+    -cellphone: String
+    -password: String
+    -dateOfRegistration: Date 
+    +User()
+    +register():void
+    +login():void
+    +deleteAccount():void
+}
+
+class ResponsibleUser extends User{
+   
+   +ResponsibleUser()
+   +register():void 
+   +login():void 
+   +deleteAccount(): void
+   +manageProjects():void
+}
+
+abstract class User{
+    -idUser:String 
+    -name:String
+    -email:String 
+    -cellphone: String
+    -password: String
+    -dateOfRegistration: Date 
+    +User()
+    +register():void
+    +login():void
+    +deleteAccount():void
+}
+
+class Device{
+    -idDevice: String
+    -name: String
+    -model: String
+    -location: String
+    -description: String
+    -status:Boolean
+    -installation:Date
+    -measurement: Measurement
+    -historial: HistorialConsumo
+    +Device()
+    +takeMeasurement():void
+    +generateHistory(): UsageHistory
+
+}
+
+class Measurement{
+    -id_measurement: String
+    -datetime:LocalDatetime
+    -voltage:double
+    -current: double
+    -power: double
+    +Measurement()
+}
+
+class UsageHistory{
+    -idUsageHistory: String
+    -period: String
+    -startDate: Date
+    -endDate: Date
+    -totalConsumption:double
+    -averageConsumption: double
+    +UsageHistory()
+}
+
+
+abstract class Notification{
+    -idNotification:String
+    -title: String
+    -read: Boolean
+    -datetime: LocalDatetime
+    +Notification()
+    +generateNotification():void
+    +sendNotification():void
+}
+
+enum RiskConsumption{
+    LOW 
+    MEDIUM 
+    HIGHT
+    CRITICAL
+}
+
+
+
+'Relationships
