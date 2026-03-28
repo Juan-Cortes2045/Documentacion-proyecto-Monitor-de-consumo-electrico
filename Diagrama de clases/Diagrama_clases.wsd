@@ -42,7 +42,7 @@ class Device{
     -location: String
     -description: String
     -status:Boolean
-    -installation:Date
+    -installationDate:Date
     -measurement: Measurement
     -historial: HistorialConsumo
     +Device()
@@ -88,6 +88,13 @@ enum RiskConsumption{
     CRITICAL
 }
 
-
+class Alert extends Notification{
+    -status: Boolean
+    -nivel: RiskConsumption
+    +Alert()
+    +resolveAlert():void
+    +generateNotification():void
+    +sendNotification():void
+}
 
 'Relationships
