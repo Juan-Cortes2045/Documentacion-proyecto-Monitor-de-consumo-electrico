@@ -67,7 +67,8 @@ class Measurement{
     -datetime:LocalDatetime
     -voltage:double
     -current: double
-    -power: double
+    -activePower: double
+    -storedEnergy: double
     +Measurement()
 }
 
