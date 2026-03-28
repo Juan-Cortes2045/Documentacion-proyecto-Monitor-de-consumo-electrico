@@ -22,6 +22,17 @@ class ResponsibleUser extends User{
    +manageProjects():void
 }
 
+class UserConfiguration{
+    -dailyLimit:double
+    -monthlyLimit:double
+    -notifications: Boolean
+    +UserConfiguration()
+    +configureThresholds():void
+    +configureNotifications():void
+    +updateProfile():void
+    +resetPassword():void
+}
+
 abstract class User{
     -idUser:String 
     -name:String
@@ -97,4 +108,29 @@ class Alert extends Notification{
     +sendNotification():void
 }
 
+class Recommendation extends Notification{
+    +Recommendation()
+    +generateNotification():void
+    +sendNotification():void
+}
+
+
+
 'Relationships
+
+User  "1" *-- "1" UserConfiguration
+User "1" o-- "1..*" Notification
+User "1" <-- "0..1" UsageHistory
+User "1" o-- "o..*" Device
+
+Device "1" *-- "0..*" Measurement
+Device "1" *-- "0..1" UsageHistory
+
+
+Measurement "1" <-- "0..*" Alert
+Measurement "1" <-- "0..*" Recommendation
+
+Alert <-- RiskConsumption
+
+
+
