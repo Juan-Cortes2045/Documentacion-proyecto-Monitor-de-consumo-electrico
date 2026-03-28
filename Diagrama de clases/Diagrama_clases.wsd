@@ -1,137 +1,115 @@
 @startuml diagrama_clases
 
-abstract class User{
-    -idUser:String 
-    -name:String
-    -email:String 
-    -cellphone: String
-    -password: String
-    -dateOfRegistration: Date 
-    +User()
-    +register():void
-    +login():void
-    +deleteAccount():void
+abstract class User {
+    - idUser : String
+    - name : String
+    - email : String
+    - cellphone : String
+    - password : String
+    - dateOfRegistration : Date
+    + register() : void
+    + login() : void
+    + logout() : void
+    + deleteAccount() : void
 }
 
-class ResponsibleUser extends User{
-   
-   +ResponsibleUser()
-   +register():void 
-   +login():void 
-   +deleteAccount(): void
-   +manageProjects():void
+class RegularUser {
+    + manageOwnDevices() : void
 }
 
-class UserConfiguration{
-    -dailyLimit:double
-    -monthlyLimit:double
-    -notifications: Boolean
-    +UserConfiguration()
-    +configureThresholds():void
-    +configureNotifications():void
-    +updateProfile():void
-    +resetPassword():void
+class ResponsibleUser {
+    + manageProjects() : void
 }
 
-abstract class User{
-    -idUser:String 
-    -name:String
-    -email:String 
-    -cellphone: String
-    -password: String
-    -dateOfRegistration: Date 
-    +User()
-    +register():void
-    +login():void
-    +deleteAccount():void
+class UserConfiguration {
+    - dailyLimit : double
+    - monthlyLimit : double
+    - notifications : Boolean
+    + configureThresholds() : void
+    + configureNotifications() : void
+    + updateProfile() : void
+    + resetPassword() : void
+    + getConfiguration() : UserConfiguration
 }
 
-class Device{
-    -idDevice: String
-    -name: String
-    -model: String
-    -location: String
-    -description: String
-    -status:Boolean
-    -installationDate:Date
-    -measurement: Measurement
-    -historial: HistorialConsumo
-    +Device()
-    +takeMeasurement():void
-    +generateHistory(): UsageHistory
-
+class Device {
+    - idDevice : String
+    - name : String
+    - model : String
+    - location : String
+    - description : String
+    - status : Boolean
+    - installationDate : Date
+    + takeMeasurement() : Measurement
+    + getUsageHistory() : UsageHistory
+    + updateStatus() : void
 }
 
-class Measurement{
-    -id_measurement: String
-    -datetime:LocalDatetime
-    -voltage:double
-    -current: double
-    -activePower: double
-    -storedEnergy: double
-    +Measurement()
+class Measurement {
+    - idMeasurement : String
+    - datetime : LocalDateTime
+    - voltage : double
+    - current : double
+    - activePower : double
+    - storedEnergy : double
+    + getValues() : Map
 }
 
-class UsageHistory{
-    -idUsageHistory: String
-    -period: String
-    -startDate: Date
-    -endDate: Date
-    -totalConsumption:double
-    -averageConsumption: double
-    +UsageHistory()
+class UsageHistory {
+    - idUsageHistory : String
+    - period : String
+    - startDate : Date
+    - endDate : Date
+    - totalConsumption : double
+    - averageConsumption : double
+    + getSummary() : String
 }
 
-
-abstract class Notification{
-    -idNotification:String
-    -title: String
-    -read: Boolean
-    -datetime: LocalDatetime
-    +Notification()
-    +generateNotification():void
-    +sendNotification():void
+abstract class Notification {
+    - idNotification : String
+    - title : String
+    - message : String
+    - read : Boolean
+    - datetime : LocalDateTime
+    + generate() : void
+    + send() : void
+    + markAsRead() : void
 }
 
-enum RiskConsumption{
-    LOW 
-    MEDIUM 
-    HIGHT
+enum RiskConsumption {
+    LOW
+    MEDIUM
+    HIGH
     CRITICAL
 }
 
-class Alert extends Notification{
-    -status: Boolean
-    -nivel: RiskConsumption
-    +Alert()
-    +resolveAlert():void
-    +generateNotification():void
-    +sendNotification():void
+class Alert {
+    - status : Boolean
+    - riskLevel : RiskConsumption
+    + resolveAlert() : void
 }
 
-class Recommendation extends Notification{
-    +Recommendation()
-    +generateNotification():void
-    +sendNotification():void
+class Recommendation {
+    - content : String
+    - source : String
+    + applyRecommendation() : void
 }
 
+User <|-- RegularUser
+User <|-- ResponsibleUser
+Notification <|-- Alert
+Notification <|-- Recommendation
 
-
-'Relationships
-
-User  "1" *-- "1" UserConfiguration
-User "1" o-- "1..*" Notification
-User "1" <-- "0..1" UsageHistory
-User "1" o-- "o..*" Device
-
+User "1" *-- "1" UserConfiguration
 Device "1" *-- "0..*" Measurement
 Device "1" *-- "0..1" UsageHistory
 
+User "1" o-- "0..*" Device
+User "1" o-- "1..*" Notification
 
-Measurement "1" <-- "0..*" Alert
-Measurement "1" <-- "0..*" Recommendation
+Measurement "1" ..> "0..*" Alert
+Measurement "1" ..> "0..*" Recommendation
 
-Alert <-- RiskConsumption
+Alert ..> RiskConsumption
 
-
-
+@enduml
