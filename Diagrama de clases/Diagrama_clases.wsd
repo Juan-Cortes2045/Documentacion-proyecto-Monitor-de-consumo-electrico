@@ -54,6 +54,11 @@ package enums{
         EMAIL
         BOTH
     }
+
+    enum AlertStatus{
+        PENDING 
+        RESOLVED
+    }
 }
 
 package Domain_User-Configuration{
@@ -116,6 +121,8 @@ package Domain_Devices-Measurements{
         - status : DeviceStatus
         - installationDate : Date
         - lastReadingAt: LocalDateTime
+        - deviceCode : String
+        - apiKey : String
         - observers : List<MeasurementObserver>
         + takeMeasurement() : Measurement
         + getUsageHistory() : UsageHistory
@@ -177,7 +184,7 @@ package Domain_Notifications{
     }
 
     class Alert extends Notification {
-        - status : Boolean
+        - status : AlertStatus
         - riskLevel : RiskConsumption
         + resolveAlert() : void
     }
@@ -249,7 +256,7 @@ User ..> SystemConfig : use
 
 ' Compocition user
 User "1" *-- "1" UserConfiguration
-User "1" o-- "0..1" Project
+User "1" o-- "0..*" Project
 User "1" o-- "0..*" Notification
 
 ' Composition project
@@ -269,7 +276,7 @@ Device ..> MeasurementObserver : notify
 AlertFactory ..> Alert : create
 RecommendationFactory ..> Recommendation : create
 Alert ..> RiskConsumption
-
+Alert ..> AlertStatus
 ' Template Method
 ReportGenerator ..> UsageHistory : processes
 
