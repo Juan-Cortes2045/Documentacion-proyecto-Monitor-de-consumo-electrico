@@ -1,115 +1,276 @@
 @startuml diagrama_clases
 
-abstract class User {
-    - idUser : String
-    - name : String
-    - email : String
-    - cellphone : String
-    - password : String
-    - dateOfRegistration : Date
-    + register() : void
-    + login() : void
-    + logout() : void
-    + deleteAccount() : void
+package Strayegy_Pattern{
+
+
+    interface UserPermissions {
+        + canManageDevices() : boolean
+        + canManageProjects() : boolean
+    }
+
+    class RegularPermissions implements UserPermissions {
+        + canManageDevices() : boolean
+        + canManageProjects() : boolean
+    }
+    class ResponsiblePermissions implements UserPermissions {
+        + canManageDevices() : boolean
+        + canManageProjects() : boolean
+    }
 }
 
-class RegularUser {
-    + manageOwnDevices() : void
+package Singleton_Pattern{
+
+
+    class SystemConfig {
+        - instance : SystemConfig {static}
+        - defaultDailyLimit : double
+        - defaultMonthlyLimit : double
+        - notificationsEnabled : Boolean
+        - defaultLanguage: String 
+        - SystemConfig()
+        + getInstance() : SystemConfig {static}
+        + getDefaultDailyLimit() : double
+        + getDefaultMonthlyLimit() : double
+        + getDefaultLanguage(): String
+        + isNotificationsEnabled() : Boolean
+    }
 }
 
-class ResponsibleUser {
-    + manageProjects() : void
+package enums{
+    enum DeviceStatus{
+        ONLINE
+        OFFLINE
+    }
+
+    enum RiskConsumption {
+            LOW
+            MEDIUM
+            HIGH
+            CRITICAL
+    }
+
+    enum AlertChannel{
+        PUSH_NOTIFICATION
+        EMAIL
+        BOTH
+    }
 }
 
-class UserConfiguration {
-    - dailyLimit : double
-    - monthlyLimit : double
-    - notifications : Boolean
-    + configureThresholds() : void
-    + configureNotifications() : void
-    + updateProfile() : void
-    + resetPassword() : void
-    + getConfiguration() : UserConfiguration
+package Domain_User-Configuration{
+    abstract class User {
+        - idUser : String
+        - name : String
+        - email : String
+        - cellphone : String
+        - password : String
+        - dateOfRegistration : Date
+        - permissions : UserPermissions
+        + register() : void
+        + login() : void
+        + logout() : void
+        + updateInfo():void
+        + deleteAccount() : void
+        + canManageDevices() : boolean
+    }
+
+
+    class ResponsibleUser extends User {
+        + linkDevice(d : Device, project : Project) : void
+        + removeDevice(d : Device, project : Project) : void
+        + addUserToProject(u : User, project : Project) : void
+        + removeUserFromProject(u: User, p: Project): void
+        + getAllDevices(project : Project) : List<Device>
+    }
+
+    class UserConfiguration {
+        - dailyLimit : double
+        - monthlyLimit : double
+        - notificationsEnabled : Boolean
+        - alertChannel: AlertChannel
+        - colorTHeme: String
+        - language: String
+        - socialProvider: String
+        + configureThresholds() : void
+        + configureNotifications() : void
+        + changeColorTheme(): void
+        + changeLanguage():void 
+        + resetPassword():void
+    }
 }
 
-class Device {
-    - idDevice : String
-    - name : String
-    - model : String
-    - location : String
-    - description : String
-    - status : Boolean
-    - installationDate : Date
-    + takeMeasurement() : Measurement
-    + getUsageHistory() : UsageHistory
-    + updateStatus() : void
+package Domain_Devices-Measurements{
+    class Project{
+        - projectCode: String
+        - address: String
+        - accessCode: String
+        - description: String
+        - creationDate: Date
+        + addDevice(d: Device): void
+    }
+    class Device {
+        - idDevice : String
+        - name : String
+        - model : String
+        - location : String
+        - description : String
+        - status : DeviceStatus
+        - installationDate : Date
+        - lastReadingAt: LocalDateTime
+        - observers : List<MeasurementObserver>
+        + takeMeasurement() : Measurement
+        + getUsageHistory() : UsageHistory
+        + updateStatus() : void
+        + subscribe(o : MeasurementObserver) : void
+        + unsubscribe(o : MeasurementObserver) : void
+        + notify(m : Measurement) : void
+    }
+
+    class Measurement {
+        - idMeasurement : String
+        - datetime : LocalDateTime
+        - voltage : double
+        - current : double
+        - activePower : double
+        - storedEnergy : double
+        + getVoltage() : double
+        + getCurrent() : double
+        + getActivePower() : double
+        + getStoredEnergy() : double
+    }
+
+    class UsageHistory {
+        - idUsageHistory : String
+        - period : String
+        - startDate : Date
+        - endDate : Date
+        - totalConsumption : double
+        - averageConsumption : double
+        + getSummary() : String
+        + getMeasurements() : List<Measurement>
+    }
 }
 
-class Measurement {
-    - idMeasurement : String
-    - datetime : LocalDateTime
-    - voltage : double
-    - current : double
-    - activePower : double
-    - storedEnergy : double
-    + getValues() : Map
+package Observer_Pattern{
+    interface MeasurementObserver {
+        + onMeasurement(m : Measurement) : void
+    }
+
+    class AlertObserver implements MeasurementObserver {
+        + onMeasurement(m : Measurement) : void
+    }
+
+    class RecommendationObserver implements MeasurementObserver {
+        + onMeasurement(m : Measurement) : void
+    }
 }
 
-class UsageHistory {
-    - idUsageHistory : String
-    - period : String
-    - startDate : Date
-    - endDate : Date
-    - totalConsumption : double
-    - averageConsumption : double
-    + getSummary() : String
+package Domain_Notifications{
+    abstract class Notification {
+        - idNotification : String
+        - title : String
+        - message : String
+        - read : Boolean
+        - datetime : LocalDateTime
+        + generate() : void
+        + send() : void
+        + markAsRead() : void
+    }
+
+    class Alert extends Notification {
+        - status : Boolean
+        - riskLevel : RiskConsumption
+        + resolveAlert() : void
+    }
+
+    class Recommendation extends Notification {
+        - content : String
+        - source : String
+    }
 }
 
-abstract class Notification {
-    - idNotification : String
-    - title : String
-    - message : String
-    - read : Boolean
-    - datetime : LocalDateTime
-    + generate() : void
-    + send() : void
-    + markAsRead() : void
+package Factory_Methon_Pattern{
+    abstract class NotificationFactory {
+        + create(m : Measurement, risk : RiskConsumption) : Notification
+    }
+
+    class AlertFactory extends NotificationFactory {
+        + create(m : Measurement, risk : RiskConsumption) : Alert
+    }
+
+    class RecommendationFactory extends NotificationFactory {
+        + create(m : Measurement, risk : RiskConsumption) : Recommendation
+    }
+
 }
 
-enum RiskConsumption {
-    LOW
-    MEDIUM
-    HIGH
-    CRITICAL
+
+package Template_Method_Pattern{
+    abstract class ReportGenerator {
+        + generate(h : UsageHistory) : Report {final}
+        # filterByPeriod(data : List) : List
+        # format(total : double) : Report
+        - fetchData(h : UsageHistory) : List
+        - aggregate(data : List) : double
+    }
+
+    class DailyReportGenerator extends ReportGenerator {
+        # filterByPeriod(data : List) : List
+        # format(total : double) : Report
+    }
+
+    class MonthlyReportGenerator extends ReportGenerator {
+        # filterByPeriod(data : List) : List
+        # format(total : double) : Report
+    }
+
+    class DeviceReportGenerator extends ReportGenerator {
+        - targetDeviceId : String
+        # filterByPeriod(data : List) : List
+        # format(total : double) : Report
+    }
+
+    class ComparisonReportGenerator extends ReportGenerator {
+        # filterByPeriod(data : List) : List
+        # format(total : double) : Report
+    }
 }
 
-class Alert {
-    - status : Boolean
-    - riskLevel : RiskConsumption
-    + resolveAlert() : void
-}
+' Relationships
 
-class Recommendation {
-    - content : String
-    - source : String
-    + applyRecommendation() : void
-}
 
-User <|-- RegularUser
-User <|-- ResponsibleUser
-Notification <|-- Alert
-Notification <|-- Recommendation
+' Strategy
+User ..> UserPermissions : use
 
+' Singleton
+UserConfiguration ..> SystemConfig 
+UserConfiguration ..> AlertChannel : use
+User ..> SystemConfig : use
+
+
+' Compocition user
 User "1" *-- "1" UserConfiguration
+User "1" o-- "0..1" Project
+User "1" o-- "0..*" Notification
+
+' Composition project
+Project "1" *-- "0..*" Device
+
+' Composition device
 Device "1" *-- "0..*" Measurement
 Device "1" *-- "0..1" UsageHistory
 
-User "1" o-- "0..*" Device
-User "1" o-- "1..*" Notification
+' Device uses DeviceStatus
+Device ..> DeviceStatus: use
 
-Measurement "1" ..> "0..*" Alert
-Measurement "1" ..> "0..*" Recommendation
+' Observer
+Device ..> MeasurementObserver : notify
 
+' Factory Method
+AlertFactory ..> Alert : create
+RecommendationFactory ..> Recommendation : create
 Alert ..> RiskConsumption
+
+' Template Method
+ReportGenerator ..> UsageHistory : processes
 
 @enduml
