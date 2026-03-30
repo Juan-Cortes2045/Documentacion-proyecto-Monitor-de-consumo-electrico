@@ -1,0 +1,75 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="28.2.8">
+  <diagram name="Página-1" id="dA6l_5v8mgOklOdyu2dR">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="6xKWT2tnaw4YUti82u0S-1" value="" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="1">
+          <mxGeometry x="437" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="6xKWT2tnaw4YUti82u0S-2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;verticalAlign=bottom;endArrow=open;endSize=8;strokeColor=#ff0000;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="6xKWT2tnaw4YUti82u0S-1" target="6xKWT2tnaw4YUti82u0S-3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="90" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="6xKWT2tnaw4YUti82u0S-3" target="KJCelpRnh7Y5tOFXLLzX-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6xKWT2tnaw4YUti82u0S-3" value="Sistema detecta medición fuera del umbral" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="355" y="120" width="195" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="KJCelpRnh7Y5tOFXLLzX-1" target="KJCelpRnh7Y5tOFXLLzX-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-1" value="Genera alerta automática" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="355" y="230" width="195" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="KJCelpRnh7Y5tOFXLLzX-3" target="KJCelpRnh7Y5tOFXLLzX-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-3" value="Envía notificación al usuario (app/web)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="355" y="340" width="195" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="KJCelpRnh7Y5tOFXLLzX-5" target="KJCelpRnh7Y5tOFXLLzX-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-5" value="Usuario abre el modulo &quot;Alertas&quot;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="354" y="440" width="196" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="KJCelpRnh7Y5tOFXLLzX-7" target="KJCelpRnh7Y5tOFXLLzX-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-7" value="Visualiza lista de alertas recientes" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="355" y="540" width="195" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="KJCelpRnh7Y5tOFXLLzX-9" target="KJCelpRnh7Y5tOFXLLzX-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-9" value="Selecciona una alerta para ver detalle" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="355" y="670" width="195" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="KJCelpRnh7Y5tOFXLLzX-11" target="KJCelpRnh7Y5tOFXLLzX-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-11" value="Revisa causas y sugerencias" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="355" y="790" width="195" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="KJCelpRnh7Y5tOFXLLzX-13" target="KJCelpRnh7Y5tOFXLLzX-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-13" value="Marcar alerta como leída o resuelta" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="355" y="910" width="195" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="KJCelpRnh7Y5tOFXLLzX-15" target="KJCelpRnh7Y5tOFXLLzX-17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-15" value="Usuario puede volver al Dashboard" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="355" y="1030" width="195" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KJCelpRnh7Y5tOFXLLzX-17" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="1">
+          <mxGeometry x="437.5" y="1150" width="30" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

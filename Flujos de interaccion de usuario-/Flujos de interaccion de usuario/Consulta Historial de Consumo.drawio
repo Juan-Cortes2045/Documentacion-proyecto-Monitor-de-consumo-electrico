@@ -1,0 +1,98 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="28.2.9">
+  <diagram name="Página-1" id="coqQmu9Lz6Am4j-UHHw8">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--1" value="" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="1">
+          <mxGeometry x="520" y="200" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;verticalAlign=bottom;endArrow=open;endSize=8;strokeColor=#ff0000;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--1" target="grQ_Ghd4VG_18WxiHW6--3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="535" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--3" target="grQ_Ghd4VG_18WxiHW6--4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--3" value="Usuario selecciona &quot;Historial de consumo&quot;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="475" y="280" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--4" target="grQ_Ghd4VG_18WxiHW6--5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--4" value="Sistema solicita rango de fechas" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="475" y="360" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--5" target="grQ_Ghd4VG_18WxiHW6--8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--5" value="Usuario define periodo (diario, semanal, mensual)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="475" y="440" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--8" target="grQ_Ghd4VG_18WxiHW6--10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--8" value="Sistema consulta base de datos" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="475" y="520" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--10" target="grQ_Ghd4VG_18WxiHW6--12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--10" value="Genera gráficos de consumo" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="475" y="610" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--12" target="grQ_Ghd4VG_18WxiHW6--14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--12" value="Mostrar comparativa con periodos anteriores" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="475" y="700" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--14" target="grQ_Ghd4VG_18WxiHW6--17">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="710" y="815" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--14" target="grQ_Ghd4VG_18WxiHW6--16">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="820" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--14" value="¿Usuario desea exportar datos?" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="790" width="230" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--16" target="grQ_Ghd4VG_18WxiHW6--21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--16" value="Permitir exportar a PDF o Excel" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="870" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--17" target="grQ_Ghd4VG_18WxiHW6--21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--17" value="Mantener vista actual" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="650" y="870" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--29" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--20" target="grQ_Ghd4VG_18WxiHW6--28">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--20" value="Usuario desea volver al Dashboard" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="475" y="1040" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--24" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--21" target="grQ_Ghd4VG_18WxiHW6--20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--21" value="" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="495" y="930" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--28" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="1">
+          <mxGeometry x="520" y="1130" width="30" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

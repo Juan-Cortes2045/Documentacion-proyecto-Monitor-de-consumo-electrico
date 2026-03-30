@@ -7,6 +7,6 @@ entity User{
     cellphone: VARCHAR(15) 
     password: VARCHAR(18) UNIQUE
     date_of_registation: TIMESTAMP UNIQUE
-    permissions: VARCHAR
+    permissions: VARCHAR(100)
     
 }
