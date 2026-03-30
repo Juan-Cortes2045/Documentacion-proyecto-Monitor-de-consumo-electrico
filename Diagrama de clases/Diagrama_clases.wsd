@@ -210,38 +210,6 @@ package Factory_Methon_Pattern{
 
 }
 
-
-package Template_Method_Pattern{
-    abstract class ReportGenerator {
-        + generate(h : UsageHistory) : Report {final}
-        # filterByPeriod(data : List) : List
-        # format(total : double) : Report
-        - fetchData(h : UsageHistory) : List
-        - aggregate(data : List) : double
-    }
-
-    class DailyReportGenerator extends ReportGenerator {
-        # filterByPeriod(data : List) : List
-        # format(total : double) : Report
-    }
-
-    class MonthlyReportGenerator extends ReportGenerator {
-        # filterByPeriod(data : List) : List
-        # format(total : double) : Report
-    }
-
-    class DeviceReportGenerator extends ReportGenerator {
-        - targetDeviceId : String
-        # filterByPeriod(data : List) : List
-        # format(total : double) : Report
-    }
-
-    class ComparisonReportGenerator extends ReportGenerator {
-        # filterByPeriod(data : List) : List
-        # format(total : double) : Report
-    }
-}
-
 ' Relationships
 
 
@@ -277,7 +245,6 @@ AlertFactory ..> Alert : create
 RecommendationFactory ..> Recommendation : create
 Alert ..> RiskConsumption
 Alert ..> AlertStatus
-' Template Method
-ReportGenerator ..> UsageHistory : processes
+
 
 @enduml

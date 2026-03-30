@@ -1,0 +1,12 @@
+@startuml mem
+
+entity User{
+    + id_user: VARCHAR <<PK>>
+    name: VARCHAR(100)
+    email: VARCHAR(100)
+    cellphone: VARCHAR(15) 
+    password: VARCHAR(18) UNIQUE
+    date_of_registation: TIMESTAMP UNIQUE
+    permissions: VARCHAR
+    
+}
