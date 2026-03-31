@@ -10,16 +10,6 @@ entity User{
     * date_of_registation: DATETIME <<NOT NULL>>
 }
 
-entity ResponsibleUser{
-    + id_responsible_user: VARCHAR(10) <<PK>>
-    --
-    * name: VARCHAR(100) <<NOT NULL>>
-    * email: VARCHAR(100) <<NOT NULL>>
-    * cellphone: VARCHAR(15) <<NOT NULL>>
-    * password: VARCHAR(18) <<UNIQUE>>
-    * date_of_registation: DATETIME <<NOT NULL>>
-}
-
 enum NotificationsEnabled{
     ENABLED 
     DISABLED
@@ -44,15 +34,6 @@ entity UserConfiguration{
     socialProvider: VARCHAR(50)
 }
 
-entity SystemConfig{
-    + id_system_config: VARCHAR(10) <<PK>>
-    --
-    * defaultDailyLimit : DOUBLE <<NOT NULL>>
-    * defaultMonthlyLimit : DOUBLE <<NOT NULL>>
-    * notificationsEnabled : NotificationsEnabled <<NOT NULL>>
-    * defaultLanguage: VARCHAR(20) <<NOT NULL>>
-}
-
 entity Project{
     + project_code: VARCHAR(10) <<PK>>
     --
@@ -74,18 +55,25 @@ entity Device{
     * model: String <<NOT NULL>>
     location: VARCHAR(50) 
     description: VARCHAR(200)
-    * status: DeviceStatus <<NOT NULL>>
     * installation_date: DATETIME <<NOT NULL>>
     * device_code: VARCHAR(6) <<UNIQUE>> <<NOT NULL>>
     * api_key: VARCHAR(100)  <<NOT NULL>>
 
 }
 
+entity DeviceStatusLog{
+    + id_device_status VARCHAR(10) <<PK>>
+    --
+    * id_device VARCHAR(10) <<FK>>
+    * status: DeviceStatus <<NOT NULL>>
+    * last_seen: DATETIME <<NOT NULL>>
+}
+
 entity Measurement{
     + id_measurement: VARCHAR(10) <<PK>>
     --
     * id_device: VARCHAR(10) <<FK>> <<NOT NULL>>
-    * date_time: DATETIME <<PK>> <<NOT NULL>>
+    * date_time: DATETIME <<NOT NULL>>
     * voltage: DOUBLE <<NOT NULL>>
     * current: DOUBLE <<NOT NULL>>
     * activePower: DOUBLE <<NOT NULL>>
@@ -128,7 +116,8 @@ entity Alert{
     * status: NotificationsStatus <<NOT NULL>>
     * date_time: DATETIME <<NOT NULL>>
     * alert_status: AlertStatus <<NOT NULL>>
-    * comsumption_level: VARCHAR(50) <<FK>> <<NOT NULL>> 
+    * id_comsumption_level: VARCHAR(50) <<FK>> <<NOT NULL>> 
+    * id_measurement VARCHAR(10) <<FK>> <<NOT NULL>> 
 }
 
 entity Recommendation{
@@ -151,41 +140,47 @@ entity ConsumptionLevel{
     * max_limit: DOUBLE <<NOT NULL>>
 }
 
-entity ProjectManagement{
-    + project_code: VARCHAR(10) <<PK>> <<FK>>
-    + id_user: VARCHAR(10) <<PK>> <<FK>>
-    + id_device: VARCHAR(10) <<PK>> <<FK>>
-    + id_reponsible_user: VARCHAR(10) <<PK>> <<FK>>
-    + id_system_config: VARCHAR(10) <<FK>>
+enum Role{
+    REGULAR
+    RESPONSIBLE
 }
 
+entity UserProject{
+    +id_user VARCHAR(10) <<PK>> <<FK>>
+    +project_code VARCHAR(10) <<PK>> <<FK>>
+    * role: Role <<NOT NULL>>
+}
+
+entity DeviceProject{
+    + id_device VARCHAR(10) <<PK>> <<FK>>
+    + project_code VARCHAR(10) <<PK>> <<FK>>
+}
 
 
 ' Relationships
 
 User ||--|| UserConfiguration
-User ||--o{ ProjectManagement
 User ||--o{ Notification
 User ||--o{ Alert
 User ||--o{ Recommendation
+User ||--o{ UserProject 
+UserProject --> Role: uses 
 
-ResponsibleUser ||--{ ProjectManagement
 
+Project ||--o{ DeviceProject
+Project ||--o{ UserProject
 
-Device ||--o{ ProjectManagement
 Device ||--o{ Measurement
-Device --> DeviceStatus
-
-Project ||--o{ ProjectManagement
+DeviceStatusLog --> DeviceStatus: uses
+DeviceStatusLog ||--o{ Device
+Device ||--o{ DeviceProject: uses
 
 Alert ||--o{ConsumptionLevel
 Alert --> NotificationsStatus: uses
 Alert --> AlertStatus: uses
 
 UserConfiguration --> NotificationsEnabled: uses
-UserConfiguration --NotificationChannel: uses
-
-SystemConfig --> NotificationsEnabled: uses
+UserConfiguration --> NotificationChannel: uses
 
 Notification --> NotificationsStatus: uses
 
