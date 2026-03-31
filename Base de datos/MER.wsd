@@ -1,12 +1,194 @@
-@startuml mem
+@startuml mer
 
 entity User{
-    + id_user: VARCHAR <<PK>>
-    name: VARCHAR(100)
-    email: VARCHAR(100)
-    cellphone: VARCHAR(15) 
-    password: VARCHAR(18) UNIQUE
-    date_of_registation: TIMESTAMP UNIQUE
-    permissions: VARCHAR(100)
-    
+    + id_user: VARCHAR(10) <<PK>>
+    --
+    * name: VARCHAR(100) <<NOT NULL>>
+    * email: VARCHAR(100) <<NOT NULL>>
+    * cellphone: VARCHAR(15) <<NOT NULL>>
+    * password: VARCHAR(18) <<UNIQUE>>
+    * date_of_registation: DATETIME <<NOT NULL>>
 }
+
+entity ResponsibleUser{
+    + id_responsible_user: VARCHAR(10) <<PK>>
+    --
+    * name: VARCHAR(100) <<NOT NULL>>
+    * email: VARCHAR(100) <<NOT NULL>>
+    * cellphone: VARCHAR(15) <<NOT NULL>>
+    * password: VARCHAR(18) <<UNIQUE>>
+    * date_of_registation: DATETIME <<NOT NULL>>
+}
+
+enum NotificationsEnabled{
+    ENABLED 
+    DISABLED
+}
+
+enum NotificationChannel{
+    PUSH_NOTIFICATION
+    EMAIL
+    BOTH
+}
+
+entity UserConfiguration{
+    + id_configuration: VARCHAR(10) <<PK>>
+    --
+    * id_user: VARCHAR(10) <<FK>> <<UNIQUE>>
+    * dailyLimit: DOUBLE <<NOT NULL>>
+    * monthlyLimit: DOUBLE <<NOT NULL>>
+    * notificationsEnabled: NotificationsEnabled <<NOT NULL>>
+    * notificationChannel: NotificationChannel <<NOT NULL>>
+    colorTheme: VARCHAR(50) 
+    language: VARCHAR(50)
+    socialProvider: VARCHAR(50)
+}
+
+entity SystemConfig{
+    + id_system_config: VARCHAR(10) <<PK>>
+    --
+    * defaultDailyLimit : DOUBLE <<NOT NULL>>
+    * defaultMonthlyLimit : DOUBLE <<NOT NULL>>
+    * notificationsEnabled : NotificationsEnabled <<NOT NULL>>
+    * defaultLanguage: VARCHAR(20) <<NOT NULL>>
+}
+
+entity Project{
+    + project_code: VARCHAR(10) <<PK>>
+    --
+    * address: VARCHAR(50) <<NOT NULL>>
+    * access_code: VARCHAR(6) <<UNIQUE>> <<NOT NULL>>
+    description: VARCHAR(200) 
+    * creation_date: DATETIME <<NOT NULL>>
+}
+
+enum DeviceStatus{
+    ONLINE
+    OFFLINE
+}
+
+entity Device{
+    + id_device: VARCHAR(10) <<PK>>
+    --
+    * name: VARCHAR(50)<<NOT NULL>>
+    * model: String <<NOT NULL>>
+    location: VARCHAR(50) 
+    description: VARCHAR(200)
+    * status: DeviceStatus <<NOT NULL>>
+    * installation_date: DATETIME <<NOT NULL>>
+    * device_code: VARCHAR(6) <<UNIQUE>> <<NOT NULL>>
+    * api_key: VARCHAR(100)  <<NOT NULL>>
+
+}
+
+entity Measurement{
+    + id_measurement: VARCHAR(10) <<PK>>
+    --
+    * id_device: VARCHAR(10) <<FK>> <<NOT NULL>>
+    * date_time: DATETIME <<PK>> <<NOT NULL>>
+    * voltage: DOUBLE <<NOT NULL>>
+    * current: DOUBLE <<NOT NULL>>
+    * activePower: DOUBLE <<NOT NULL>>
+    * storedEnergy: DOUBLE <<NOT NULL>>
+}
+
+enum NotificationsStatus{
+    READ 
+    UNREAD
+}
+
+entity Notification{
+    + id_notification: VARCHAR(10) <<PK>>
+    --
+    * id_user: VARCHAR(10) <<FK>> <<NOT NULL>>
+    * title: VARCHAR(50) <<NOT NULL>>
+    * message: VARCHAR(200) <<NOT NULL>>
+    * status: NotificationsStatus <<NOT NULL>>
+    * date_time: DATETIME <<NOT NULL>>
+}
+
+enum RiskConsumption{
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+}
+
+enum AlertStatus{
+    PENDING 
+    RESOLVED 
+}
+
+entity Alert{
+    + id_alert: VARCHAR(10) <<PK>>
+    --
+    * id_user: VARCHAR(10) <<FK>> <<NOT NULL>>
+    * title: VARCHAR(50) <<NOT NULL>>
+    * message: VARCHAR(200) <<NOT NULL>>
+    * status: NotificationsStatus <<NOT NULL>>
+    * date_time: DATETIME <<NOT NULL>>
+    * alert_status: AlertStatus <<NOT NULL>>
+    * comsumption_level: VARCHAR(50) <<FK>> <<NOT NULL>> 
+}
+
+entity Recommendation{
+    + id_recommendation: VARCHAR(10) <<PK>>
+    --
+    * id_user: VARCHAR(10) <<FK>> <<NOT NULL>>
+    * title: VARCHAR(50) <<NOT NULL>>
+    * message: VARCHAR(200) <<NOT NULL>>
+    * status: NotificationsStatus <<NOT NULL>>
+    * date_time: DATETIME <<NOT NULL>>
+}
+
+
+entity ConsumptionLevel{
+    + id_consumption_level: VARCHAR(10) <<PK>>
+    --
+    * name: RiskConsumption <<UNIQUE>> <<NOT NULL>>
+    * description: VARCHAR(200) <<NOT NULL>>
+    * min_limit: DOUBLE <<NOT NULL>>
+    * max_limit: DOUBLE <<NOT NULL>>
+}
+
+entity ProjectManagement{
+    + project_code: VARCHAR(10) <<PK>> <<FK>>
+    + id_user: VARCHAR(10) <<PK>> <<FK>>
+    + id_device: VARCHAR(10) <<PK>> <<FK>>
+    + id_reponsible_user: VARCHAR(10) <<PK>> <<FK>>
+    + id_system_config: VARCHAR(10) <<FK>>
+}
+
+
+
+' Relationships
+
+User ||--|| UserConfiguration
+User ||--o{ ProjectManagement
+User ||--o{ Notification
+User ||--o{ Alert
+User ||--o{ Recommendation
+
+ResponsibleUser ||--{ ProjectManagement
+
+
+Device ||--o{ ProjectManagement
+Device ||--o{ Measurement
+Device --> DeviceStatus
+
+Project ||--o{ ProjectManagement
+
+Alert ||--o{ConsumptionLevel
+Alert --> NotificationsStatus: uses
+Alert --> AlertStatus: uses
+
+UserConfiguration --> NotificationsEnabled: uses
+UserConfiguration --NotificationChannel: uses
+
+SystemConfig --> NotificationsEnabled: uses
+
+Notification --> NotificationsStatus: uses
+
+Recommendation --> NotificationsStatus: uses
+
+ConsumptionLevel --> RiskConsumption: uses

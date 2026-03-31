@@ -25,7 +25,7 @@ package Singleton_Pattern{
         - instance : SystemConfig {static}
         - defaultDailyLimit : double
         - defaultMonthlyLimit : double
-        - notificationsEnabled : Boolean
+        - notificationsEnabled : notificationsEnabled
         - defaultLanguage: String 
         - SystemConfig()
         + getInstance() : SystemConfig {static}
@@ -49,7 +49,7 @@ package enums{
             CRITICAL
     }
 
-    enum AlertChannel{
+    enum NotificationChannel{
         PUSH_NOTIFICATION
         EMAIL
         BOTH
@@ -58,6 +58,16 @@ package enums{
     enum AlertStatus{
         PENDING 
         RESOLVED
+    }
+
+    enum NotificationsEnabled{
+        ENABLED 
+        DISABLED
+    }
+
+    enum NotificationsStatus{
+        READ 
+        UNREAD
     }
 }
 
@@ -90,8 +100,8 @@ package Domain_User-Configuration{
     class UserConfiguration {
         - dailyLimit : double
         - monthlyLimit : double
-        - notificationsEnabled : Boolean
-        - alertChannel: AlertChannel
+        - notificationsEnabled : NotificationsEnabled
+        - notificationChannel: NotificationChannel
         - colorTHeme: String
         - language: String
         - socialProvider: String
@@ -176,22 +186,27 @@ package Domain_Notifications{
         - idNotification : String
         - title : String
         - message : String
-        - read : Boolean
+        - status : NotificationsStatus
         - datetime : LocalDateTime
         + generate() : void
         + send() : void
         + markAsRead() : void
     }
-
+    class ConsumptionLevel{
+        - idConsumptionLevel: String 
+        - name: RiskConsumption
+        - description: String
+        - minLimit: double
+        - maxLimit: double 
+    }
     class Alert extends Notification {
         - status : AlertStatus
-        - riskLevel : RiskConsumption
+        - consumptionLevel : ConsumptionLevel
         + resolveAlert() : void
     }
 
     class Recommendation extends Notification {
-        - content : String
-        - source : String
+       + applyRecomendation(): void
     }
 }
 
@@ -219,6 +234,7 @@ User ..> UserPermissions : use
 ' Singleton
 UserConfiguration ..> SystemConfig 
 UserConfiguration ..> AlertChannel : use
+UserConfiguration ..> NotificationsEnabled: use 
 User ..> SystemConfig : use
 
 
