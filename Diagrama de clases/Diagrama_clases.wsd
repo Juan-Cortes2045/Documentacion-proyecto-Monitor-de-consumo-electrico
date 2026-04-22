@@ -116,6 +116,7 @@ package Domain_User-Configuration{
 package Domain_Devices-Measurements{
     class Project{
         - projectCode: String
+        - name : String
         - address: String
         - accessCode: String
         - description: String

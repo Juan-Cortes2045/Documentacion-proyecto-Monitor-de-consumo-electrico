@@ -37,6 +37,7 @@ entity UserConfiguration{
 entity Project{
     + project_code: VARCHAR(10) <<PK>>
     --
+    * name: VARCHAR(50)<<NOT NULL>>
     * address: VARCHAR(50) <<NOT NULL>>
     * access_code: VARCHAR(6) <<UNIQUE>> <<NOT NULL>>
     description: VARCHAR(200) 
