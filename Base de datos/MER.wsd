@@ -37,12 +37,20 @@ entity UserConfiguration{
 entity Project{
     + project_code: VARCHAR(10) <<PK>>
     --
-    * name: VARCHAR(50)<<NOT NULL>>
+    * name: VARCHAR(50) <<NOT NULL>>
     * address: VARCHAR(50) <<NOT NULL>>
+    * project_type_id: VARCHAR(10) <<FK>> <<NOT NULL>>
+    * other_project_type: VARCHAR(50) <<NOT NULL>>
     * access_code: VARCHAR(6) <<UNIQUE>> <<NOT NULL>>
-    description: VARCHAR(200) 
+    * description: VARCHAR(200) 
     * creation_date: DATETIME <<NOT NULL>>
 }
+
+entity ProjectType{   
+    + project_type_id: VARCHAR(10) <<PK>>
+    --
+    * name: VARCHAR(50) <<NOT NULL>>
+}  
 
 enum DeviceStatus{
     ONLINE
@@ -166,7 +174,7 @@ User ||--o{ Alert
 User ||--o{ Recommendation
 User ||--o{ UserProject 
 UserProject --> Role: uses 
-
+ProjectType ||--o{ Project : classifies
 
 Project ||--o{ DeviceProject
 Project ||--o{ UserProject

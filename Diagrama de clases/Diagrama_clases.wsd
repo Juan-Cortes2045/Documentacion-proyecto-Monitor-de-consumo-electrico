@@ -113,16 +113,29 @@ package Domain_User-Configuration{
     }
 }
 
+
 package Domain_Devices-Measurements{
+
+    
+    
+
     class Project{
         - projectCode: String
         - name : String
         - address: String
+        - projectTypeId: String
         - accessCode: String
         - description: String
         - creationDate: Date
         + addDevice(d: Device): void
     }
+
+    class ProjectType{
+        - projectTypeId : String
+        - name : String
+    }
+
+
     class Device {
         - idDevice : String
         - name : String
@@ -227,6 +240,8 @@ package Factory_Methon_Pattern{
 }
 
 ' Relationships
+
+Project "0..*" --> "1"  ProjectType : Type
 
 
 ' Strategy
