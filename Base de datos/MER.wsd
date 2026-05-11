@@ -4,9 +4,9 @@ entity User{
     + id_user: VARCHAR(10) <<PK>>
     --
     * name: VARCHAR(100) <<NOT NULL>>
-    * email: VARCHAR(100) <<NOT NULL>>
+    * email: VARCHAR(255) <<NOT NULL>>
     * cellphone: VARCHAR(15) 
-    * password: VARCHAR(255) 
+    * password: VARCHAR(16) 
     * date_of_registation: DATETIME <<NOT NULL>>
 }
 
