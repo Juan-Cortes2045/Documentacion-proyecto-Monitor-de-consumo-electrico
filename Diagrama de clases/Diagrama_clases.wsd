@@ -69,11 +69,6 @@ package enums{
         OWNER
         MEMBER
     }
-
-    enum LoginType{
-        NORMAL
-        GOOGLE
-    }
 }
 
 package Domain_User-Configuration{
@@ -113,7 +108,7 @@ package Domain_User-Configuration{
         - notifyByPush : boolean
         - colorTheme: String
         - language: String
-        - loginType: LoginType
+        - socialProvider: String
         + configureNotifications() : void
         + changeColorTheme(): void
         + changeLanguage():void
@@ -121,17 +116,26 @@ package Domain_User-Configuration{
     }
 }
 
-
 package Domain_Devices-Measurements{
 
-    
-    
+    class ProjectType {
+        - idProjectType : String
+        - name : String
+    }
+
+    class ProjectThresholds {
+        - idThreshold : String
+        - dailyLimit : double
+        - monthlyLimit : double
+        - useSystemDefaults : boolean
+        + resetToDefaults() : void
+    }
 
     class Project{
         - projectCode: String
-        - name : String
+        - name: String
+        - otherProjectType: String
         - address: String
-        - projectTypeId: String
         - accessCode: String
         - description: String
         - creationDate: Date
@@ -145,12 +149,6 @@ package Domain_Devices-Measurements{
         - idApplianceType : String
         - name : String
     }
-
-    class ProjectType{
-        - projectTypeId : String
-        - name : String
-    }
-
 
     class Device {
         - idDevice : String
@@ -265,8 +263,6 @@ package Factory_Methon_Pattern{
 
 ' Relationships
 
-Project "0..*" --> "1"  ProjectType : Type
-
 
 ' Strategy
 User ..> UserPermissions : use
@@ -275,7 +271,6 @@ User ..> UserPermissions : use
 UserConfiguration ..> SystemConfig
 User ..> SystemConfig : use
 ProjectThresholds ..> SystemConfig : use defaults
-UserConfiguration ..> LoginType : uses
 
 ' Compocition user
 User "1" *-- "1" UserConfiguration
