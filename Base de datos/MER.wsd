@@ -5,33 +5,33 @@ entity User{
     --
     * name: VARCHAR(100) <<NOT NULL>>
     * email: VARCHAR(255) <<NOT NULL>>
-    * cellphone: VARCHAR(15) 
-    * password: VARCHAR(16) 
+    cellphone: VARCHAR(15)
+    * password: VARCHAR(255) <<NOT NULL>>
+    * email_verified: BOOLEAN <<NOT NULL>>
+    profile_image: VARCHAR(255)
     * date_of_registation: DATETIME <<NOT NULL>>
-}
-
-enum NotificationsEnabled{
-    ENABLED 
-    DISABLED
-}
-
-enum NotificationChannel{
-    PUSH_NOTIFICATION
-    EMAIL
-    BOTH
 }
 
 entity UserConfiguration{
     + id_configuration: VARCHAR(10) <<PK>>
     --
     * id_user: VARCHAR(10) <<FK>> <<UNIQUE>>
-    * dailyLimit: DOUBLE <<NOT NULL>>
-    * monthlyLimit: DOUBLE <<NOT NULL>>
-    * notificationsEnabled: NotificationsEnabled <<NOT NULL>>
-    * notificationChannel: NotificationChannel <<NOT NULL>>
-    colorTheme: VARCHAR(50) 
-    language: VARCHAR(50)
-    socialProvider: VARCHAR(50)
+    * notify_by_email: BOOLEAN <<NOT NULL>>
+    * notify_by_push: BOOLEAN <<NOT NULL>>
+    colorTheme: VARCHAR(50) <<NOT NULL>>
+    language: VARCHAR(50) <<NOT NULL>>
+    loginType: LoginType <<NOT NULL>>
+}
+
+enum LoginType{
+    NORMAL
+    GOOGLE
+}
+
+entity ProjectType{
+    + id_project_type: VARCHAR(10) <<PK>>
+    --
+    * name: VARCHAR(50) <<UNIQUE>> <<NOT NULL>>
 }
 
 entity Project{
@@ -60,21 +60,21 @@ enum DeviceStatus{
 entity Device{
     + id_device: VARCHAR(10) <<PK>>
     --
-    * name: VARCHAR(50)<<NOT NULL>>
-    * model: String <<NOT NULL>>
-    location: VARCHAR(50) 
+    * name: VARCHAR(50) <<NOT NULL>>
+    * id_appliance_type: VARCHAR(10) <<FK>> <<NOT NULL>>
+    location: VARCHAR(50)
     description: VARCHAR(200)
     * installation_date: DATETIME <<NOT NULL>>
     * device_code: VARCHAR(6) <<UNIQUE>> <<NOT NULL>>
-    * api_key: VARCHAR(100)  <<NOT NULL>>
-
+    * api_key: VARCHAR(100) <<NOT NULL>>
 }
 
 entity DeviceStatusLog{
-    + id_device_status VARCHAR(10) <<PK>>
+    + id_device_status: VARCHAR(10) <<PK>>
     --
-    * id_device VARCHAR(10) <<FK>>
+    * id_device: VARCHAR(10) <<FK>>
     * status: DeviceStatus <<NOT NULL>>
+    signal_strength: INT
     * last_seen: DATETIME <<NOT NULL>>
 }
 
@@ -89,19 +89,9 @@ entity Measurement{
     * storedEnergy: DOUBLE <<NOT NULL>>
 }
 
-enum NotificationsStatus{
-    READ 
+enum NotificationStatus{
+    READ
     UNREAD
-}
-
-entity Notification{
-    + id_notification: VARCHAR(10) <<PK>>
-    --
-    * id_user: VARCHAR(10) <<FK>> <<NOT NULL>>
-    * title: VARCHAR(50) <<NOT NULL>>
-    * message: VARCHAR(200) <<NOT NULL>>
-    * status: NotificationsStatus <<NOT NULL>>
-    * date_time: DATETIME <<NOT NULL>>
 }
 
 enum RiskConsumption{
@@ -111,34 +101,44 @@ enum RiskConsumption{
     CRITICAL
 }
 
+enum AlertType{
+    THRESHOLD
+    CONNECTIVITY
+}
+
+enum AlertSeverity{
+    WARNING
+    CRITICAL
+}
+
 enum AlertStatus{
-    PENDING 
-    RESOLVED 
+    PENDING
+    RESOLVED
 }
 
 entity Alert{
     + id_alert: VARCHAR(10) <<PK>>
     --
-    * id_user: VARCHAR(10) <<FK>> <<NOT NULL>>
-    * title: VARCHAR(50) <<NOT NULL>>
-    * message: VARCHAR(200) <<NOT NULL>>
-    * status: NotificationsStatus <<NOT NULL>>
+    * id_project: VARCHAR(10) <<FK>> <<NOT NULL>>
+    id_device: VARCHAR(10) <<FK>>
+    * type: AlertType <<NOT NULL>>
+    * severity: AlertSeverity <<NOT NULL>>
+    * message_key: VARCHAR(100) <<NOT NULL>>
     * date_time: DATETIME <<NOT NULL>>
     * alert_status: AlertStatus <<NOT NULL>>
-    * id_comsumption_level: VARCHAR(50) <<FK>> <<NOT NULL>> 
-    * id_measurement VARCHAR(10) <<FK>> <<NOT NULL>> 
+    id_consumption_level: VARCHAR(10) <<FK>>
+    id_measurement: VARCHAR(10) <<FK>>
 }
 
 entity Recommendation{
     + id_recommendation: VARCHAR(10) <<PK>>
     --
-    * id_user: VARCHAR(10) <<FK>> <<NOT NULL>>
-    * title: VARCHAR(50) <<NOT NULL>>
-    * message: VARCHAR(200) <<NOT NULL>>
-    * status: NotificationsStatus <<NOT NULL>>
+    * id_project: VARCHAR(10) <<FK>> <<NOT NULL>>
+    id_device: VARCHAR(10) <<FK>>
+    * message_key: VARCHAR(100) <<NOT NULL>>
     * date_time: DATETIME <<NOT NULL>>
+    * status: NotificationsStatus <<NOT NULL>>
 }
-
 
 entity ConsumptionLevel{
     + id_consumption_level: VARCHAR(10) <<PK>>
@@ -150,19 +150,21 @@ entity ConsumptionLevel{
 }
 
 enum Role{
-    REGULAR
-    RESPONSIBLE
+    OWNER
+    MEMBER
 }
 
 entity UserProject{
-    +id_user VARCHAR(10) <<PK>> <<FK>>
-    +project_code VARCHAR(10) <<PK>> <<FK>>
+    + id_user: VARCHAR(10) <<PK>> <<FK>>
+    + project_code: VARCHAR(10) <<PK>> <<FK>>
+    --
     * role: Role <<NOT NULL>>
+    * favorite: BOOLEAN <<NOT NULL>>
 }
 
 entity DeviceProject{
-    + id_device VARCHAR(10) <<PK>> <<FK>>
-    + project_code VARCHAR(10) <<PK>> <<FK>>
+    + id_device: VARCHAR(10) <<PK>> <<FK>>
+    + project_code: VARCHAR(10) <<PK>> <<FK>>
 }
 
 
@@ -177,22 +179,27 @@ UserProject --> Role: uses
 ProjectType ||--o{ Project : classifies
 
 Project ||--o{ DeviceProject
-Project ||--o{ UserProject
+Project ||--|| ProjectThresholds
+Project }o--|| ProjectType: uses
+Project ||--o{ Alert
+Project ||--o{ Recommendation
 
+Device }o--|| ApplianceType: uses
 Device ||--o{ Measurement
+Device ||--o{ DeviceStatusLog
 DeviceStatusLog --> DeviceStatus: uses
-DeviceStatusLog ||--o{ Device
 Device ||--o{ DeviceProject: uses
+Device ||--o{ Alert
+Device ||--o{ Recommendation
 
-Alert ||--o{ConsumptionLevel
-Alert --> NotificationsStatus: uses
+ConsumptionLevel |o--o{ Alert: uses
+Measurement |o--o{ Alert: uses
+Alert --> AlertType: uses
+Alert --> AlertSeverity: uses
 Alert --> AlertStatus: uses
 
-UserConfiguration --> NotificationsEnabled: uses
-UserConfiguration --> NotificationChannel: uses
-
-Notification --> NotificationsStatus: uses
-
-Recommendation --> NotificationsStatus: uses
+Recommendation --> NotificationStatus: uses
 
 ConsumptionLevel --> RiskConsumption: uses
+
+@enduml

@@ -2,17 +2,16 @@
 
 package Strayegy_Pattern{
 
-
     interface UserPermissions {
         + canManageDevices() : boolean
         + canManageProjects() : boolean
     }
 
-    class RegularPermissions implements UserPermissions {
+    class MemberPermissions implements UserPermissions {
         + canManageDevices() : boolean
         + canManageProjects() : boolean
     }
-    class ResponsiblePermissions implements UserPermissions {
+    class OwnerPermissions implements UserPermissions {
         + canManageDevices() : boolean
         + canManageProjects() : boolean
     }
@@ -20,19 +19,16 @@ package Strayegy_Pattern{
 
 package Singleton_Pattern{
 
-
     class SystemConfig {
         - instance : SystemConfig {static}
         - defaultDailyLimit : double
         - defaultMonthlyLimit : double
-        - notificationsEnabled : notificationsEnabled
-        - defaultLanguage: String 
+        - defaultLanguage: String
         - SystemConfig()
         + getInstance() : SystemConfig {static}
         + getDefaultDailyLimit() : double
         + getDefaultMonthlyLimit() : double
         + getDefaultLanguage(): String
-        + isNotificationsEnabled() : Boolean
     }
 }
 
@@ -49,25 +45,34 @@ package enums{
             CRITICAL
     }
 
-    enum NotificationChannel{
-        PUSH_NOTIFICATION
-        EMAIL
-        BOTH
+    enum AlertType{
+        THRESHOLD
+        CONNECTIVITY
+    }
+
+    enum AlertSeverity{
+        WARNING
+        CRITICAL
     }
 
     enum AlertStatus{
-        PENDING 
+        PENDING
         RESOLVED
     }
 
-    enum NotificationsEnabled{
-        ENABLED 
-        DISABLED
+    enum NotificationsStatus{
+        READ
+        UNREAD
     }
 
-    enum NotificationsStatus{
-        READ 
-        UNREAD
+    enum Role{
+        OWNER
+        MEMBER
+    }
+
+    enum LoginType{
+        NORMAL
+        GOOGLE
     }
 }
 
@@ -78,6 +83,8 @@ package Domain_User-Configuration{
         - email : String
         - cellphone : String
         - password : String
+        - emailVerified : boolean
+        - profileImage : String
         - dateOfRegistration : Date
         - permissions : UserPermissions
         + register() : void
@@ -88,8 +95,7 @@ package Domain_User-Configuration{
         + canManageDevices() : boolean
     }
 
-
-    class ResponsibleUser extends User {
+    class OwnerUser extends User {
         + linkDevice(d : Device, project : Project) : void
         + removeDevice(d : Device, project : Project) : void
         + addUserToProject(u : User, project : Project) : void
@@ -97,18 +103,20 @@ package Domain_User-Configuration{
         + getAllDevices(project : Project) : List<Device>
     }
 
+    class MemberUser extends User {
+        + toggleFavorite(project : Project) : void
+        + leaveProject(project : Project) : void
+    }
+
     class UserConfiguration {
-        - dailyLimit : double
-        - monthlyLimit : double
-        - notificationsEnabled : NotificationsEnabled
-        - notificationChannel: NotificationChannel
-        - colorTHeme: String
+        - notifyByEmail : boolean
+        - notifyByPush : boolean
+        - colorTheme: String
         - language: String
-        - socialProvider: String
-        + configureThresholds() : void
+        - loginType: LoginType
         + configureNotifications() : void
         + changeColorTheme(): void
-        + changeLanguage():void 
+        + changeLanguage():void
         + resetPassword():void
     }
 }
@@ -127,7 +135,15 @@ package Domain_Devices-Measurements{
         - accessCode: String
         - description: String
         - creationDate: Date
+        - projectType: ProjectType
+        - thresholds: ProjectThresholds
         + addDevice(d: Device): void
+        + updateThresholds(daily: double, monthly: double): void
+    }
+
+    class ApplianceType {
+        - idApplianceType : String
+        - name : String
     }
 
     class ProjectType{
@@ -139,10 +155,11 @@ package Domain_Devices-Measurements{
     class Device {
         - idDevice : String
         - name : String
-        - model : String
+        - applianceType : ApplianceType
         - location : String
         - description : String
         - status : DeviceStatus
+        - signalStrength : int
         - installationDate : Date
         - lastReadingAt: LocalDateTime
         - deviceCode : String
@@ -198,43 +215,50 @@ package Observer_Pattern{
 package Domain_Notifications{
     abstract class Notification {
         - idNotification : String
-        - title : String
-        - message : String
-        - status : NotificationsStatus
+        - messageKey : String
+        - project : Project
+        - device : Device
         - datetime : LocalDateTime
         + generate() : void
         + send() : void
-        + markAsRead() : void
     }
     class ConsumptionLevel{
-        - idConsumptionLevel: String 
+        - idConsumptionLevel: String
         - name: RiskConsumption
         - description: String
         - minLimit: double
-        - maxLimit: double 
+        - maxLimit: double
     }
     class Alert extends Notification {
+        - type : AlertType
+        - severity : AlertSeverity
         - status : AlertStatus
         - consumptionLevel : ConsumptionLevel
+        - measurement : Measurement
         + resolveAlert() : void
     }
 
     class Recommendation extends Notification {
-       + applyRecomendation(): void
+        - status : NotificationsStatus
+        + markAsRead() : void
+        + applyRecomendation(): void
     }
 }
 
 package Factory_Methon_Pattern{
     abstract class NotificationFactory {
-        + create(m : Measurement, risk : RiskConsumption) : Notification
+        + createFromMeasurement(m : Measurement, risk : RiskConsumption) : Notification
+        + createFromDeviceStatus(project : Project, device : Device) : Notification
     }
 
     class AlertFactory extends NotificationFactory {
-        + create(m : Measurement, risk : RiskConsumption) : Alert
+        + createFromMeasurement(m : Measurement, risk : RiskConsumption) : Alert
+        + createFromDeviceStatus(project : Project, device : Device) : Alert
     }
 
     class RecommendationFactory extends NotificationFactory {
-        + create(m : Measurement, risk : RiskConsumption) : Recommendation
+        + createFromMeasurement(m : Measurement, risk : RiskConsumption) : Recommendation
+        + createFromDeviceStatus(project : Project, device : Device) : Recommendation
     }
 
 }
@@ -248,23 +272,27 @@ Project "0..*" --> "1"  ProjectType : Type
 User ..> UserPermissions : use
 
 ' Singleton
-UserConfiguration ..> SystemConfig 
-UserConfiguration ..> AlertChannel : use
-UserConfiguration ..> NotificationsEnabled: use 
+UserConfiguration ..> SystemConfig
 User ..> SystemConfig : use
-
+ProjectThresholds ..> SystemConfig : use defaults
+UserConfiguration ..> LoginType : uses
 
 ' Compocition user
 User "1" *-- "1" UserConfiguration
-User "1" o-- "0..*" Project
-User "1" o-- "0..*" Notification
 
 ' Composition project
-Project "1" *-- "0..*" Device
+Project "1" *-- "1" ProjectThresholds
+Project "1" o-- "0..*" Device
+Project "*" o-- "1" ProjectType : uses
+Project "1" o-- "0..*" Alert
+Project "1" o-- "0..*" Recommendation
 
 ' Composition device
 Device "1" *-- "0..*" Measurement
 Device "1" *-- "0..1" UsageHistory
+Device "*" o-- "1" ApplianceType : uses
+Device "1" o-- "0..*" Alert
+Device "1" o-- "0..*" Recommendation
 
 ' Device uses DeviceStatus
 Device ..> DeviceStatus: use
@@ -276,7 +304,10 @@ Device ..> MeasurementObserver : notify
 AlertFactory ..> Alert : create
 RecommendationFactory ..> Recommendation : create
 Alert ..> RiskConsumption
+Alert ..> AlertType
+Alert ..> AlertSeverity
 Alert ..> AlertStatus
+Recommendation ..> NotificationsStatus
 
 
 @enduml
