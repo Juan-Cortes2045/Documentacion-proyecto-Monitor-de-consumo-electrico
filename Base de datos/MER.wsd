@@ -1,206 +1,381 @@
 @startuml mer
 
-entity User{
-    + id_user: VARCHAR(10) <<PK>>
-    --
-    * name: VARCHAR(100) <<NOT NULL>>
-    * email: VARCHAR(255) <<NOT NULL>>
-    cellphone: VARCHAR(15)
-    * password: VARCHAR(255) <<NOT NULL>>
-    * email_verified: BOOLEAN <<NOT NULL>>
-    profile_image: VARCHAR(255)
-    * date_of_registation: DATETIME <<NOT NULL>>
+package "Security" {
+
+    enum UserStatus{
+        ACTIVE
+        INACTIVE
+        BLOCKED
+    }
+
+    entity Person{
+        + id_person: VARCHAR(10) <<PK>>
+        --
+        * name: VARCHAR(100) <<NOT NULL>>
+        * last_name: VARCHAR(100) <<NOT NULL>>
+        cellphone: VARCHAR(15)
+        address: VARCHAR(200)
+        profile_image: VARCHAR(255)
+    }
+
+    entity User{
+        + id_user: VARCHAR(10) <<PK>>
+        --
+        * id_person: VARCHAR(10) <<FK>> <<UNIQUE>> <<NOT NULL>>
+        * password_hash: VARCHAR(255) <<NOT NULL>>
+        * email: VARCHAR(255) <<UNIQUE>> <<NOT NULL>>
+        * email_verified: BOOLEAN <<NOT NULL>>
+        * date_of_registation: DATETIME <<NOT NULL>>
+        * status: UserStatus <<NOT NULL>>
+        * failed_login_attempts: INT <<NOT NULL>>
+        last_login_at: DATETIME
+    }
+
+    entity UserConfiguration{
+        + id_configuration: VARCHAR(10) <<PK>>
+        --
+        * id_user: VARCHAR(10) <<FK>> <<UNIQUE>>
+        * notify_by_email: BOOLEAN <<NOT NULL>>
+        * notify_by_push: BOOLEAN <<NOT NULL>>
+        colorTheme: VARCHAR(50)
+        language: VARCHAR(50)
+        socialProvider: VARCHAR(50)
+    }
+
+    entity PasswordResetToken{
+        + id_reset_token: VARCHAR(10) <<PK>>
+        --
+        * id_user: VARCHAR(10) <<FK>> <<NOT NULL>>
+        * reset_token: VARCHAR(100) <<UNIQUE>> <<NOT NULL>>
+        * used: BOOLEAN <<NOT NULL>>
+        * created_at: DATETIME <<NOT NULL>>
+        * expiration_at: DATETIME <<NOT NULL>>
+    }
+
+    entity RefreshToken{
+        + id_refresh_token: VARCHAR(10) <<PK>>
+        --
+        * id_user: VARCHAR(10) <<FK>> <<NOT NULL>>
+        * token: VARCHAR(255) <<UNIQUE>> <<NOT NULL>>
+        * revoked: BOOLEAN <<NOT NULL>>
+        ip_address: VARCHAR(45)
+        user_agent: VARCHAR(150)
+        * created_at: DATETIME <<NOT NULL>>
+        * expiration_at: DATETIME <<NOT NULL>>
+    }
+
+    entity SystemRole{
+        + id_system_role: VARCHAR(10) <<PK>>
+        --
+        * name: VARCHAR(50) <<UNIQUE>> <<NOT NULL>>
+        description: VARCHAR(200)
+        * enabled: BOOLEAN <<NOT NULL>>
+        * created_at: DATETIME <<NOT NULL>>
+    }
+
+    entity UserSystemRole{
+        + id_user: VARCHAR(10) <<PK>> <<FK>>
+        + id_system_role: VARCHAR(10) <<PK>> <<FK>>
+        --
+        * created_at: DATETIME <<NOT NULL>>
+    }
+
+    entity Permission{
+        + id_permission: VARCHAR(10) <<PK>>
+        --
+        * code: VARCHAR(30) <<UNIQUE>> <<NOT NULL>>
+        * name: VARCHAR(50) <<NOT NULL>>
+        description: VARCHAR(100)
+    }
+
+    entity Module{
+        + id_module: VARCHAR(10) <<PK>>
+        --
+        * name: VARCHAR(50) <<NOT NULL>>
+        description: VARCHAR(100)
+        icon: VARCHAR(50)
+        * order_index: INT <<NOT NULL>>
+        * enabled: BOOLEAN <<NOT NULL>>
+        * created_at: DATETIME <<NOT NULL>>
+    }
+
+    entity Form{
+        + id_form: VARCHAR(10) <<PK>>
+        --
+        * id_module: VARCHAR(10) <<FK>> <<NOT NULL>>
+        * name: VARCHAR(50) <<NOT NULL>>
+        * route: VARCHAR(100) <<NOT NULL>> <<UNIQUE>>
+        description: VARCHAR(100)
+        icon: VARCHAR(50)
+        * order_index: INT <<NOT NULL>>
+        * enabled: BOOLEAN <<NOT NULL>>
+        * created_at: DATETIME <<NOT NULL>>
+    }
+
+    entity SystemRoleFormPermission{
+        + id_role_form_permission: VARCHAR(10) <<PK>>
+        --
+        * id_system_role: VARCHAR(10) <<FK>> <<NOT NULL>>
+        * id_permission: VARCHAR(10) <<FK>> <<NOT NULL>>
+        * id_form: VARCHAR(10) <<FK>> <<NOT NULL>>
+        * enabled: BOOLEAN <<NOT NULL>>
+        * created_at: DATETIME <<NOT NULL>>
+    }
+    note right of SystemRoleFormPermission
+        UNIQUE (
+            id_system_role,
+            id_permission,
+            id_form
+        )
+    end note
+
+
+    enum AuditAction{
+        CREATE
+        UPDATE
+        DELETE
+        LOGIN
+        LOGIN_FAILED
+        LOGOUT
+    }
+
+    entity AuditLog{
+        + id_audit_log: VARCHAR(10) <<PK>>
+        --
+        * id_user: VARCHAR(10) <<FK>> <<NOT NULL>>
+        id_permission: VARCHAR(10) <<FK>>
+        id_form: VARCHAR(10) <<FK>>
+        * action: AuditAction <<NOT NULL>>
+        description: VARCHAR(255)
+        ip_address: VARCHAR(45)
+        * created_at: DATETIME <<NOT NULL>>
+    }
+
+    ' Internal relationships of security module
+    Person ||--|| User
+    User ||--|| UserConfiguration
+    User --> UserStatus: uses
+    User ||--o{ PasswordResetToken
+    User ||--o{ RefreshToken
+
+    User ||--o{ UserSystemRole
+    SystemRole ||--o{ UserSystemRole
+
+    SystemRole ||--o{ SystemRoleFormPermission
+    Permission ||--o{ SystemRoleFormPermission
+    Form ||--o{ SystemRoleFormPermission
+
+    Module ||--o{ Form
+
+    User ||--o{ AuditLog
+    Permission |o--o{ AuditLog
+    Form |o--o{ AuditLog
+    AuditLog --> AuditAction: uses
 }
 
-entity UserConfiguration{
-    + id_configuration: VARCHAR(10) <<PK>>
-    --
-    * id_user: VARCHAR(10) <<FK>> <<UNIQUE>>
-    * notify_by_email: BOOLEAN <<NOT NULL>>
-    * notify_by_push: BOOLEAN <<NOT NULL>>
-    colorTheme: VARCHAR(50)
-    language: VARCHAR(50)
-    socialProvider: VARCHAR(50)
+package "Home Management" {
+
+    enum Role{
+        OWNER
+        MEMBER
+    }
+
+    entity HomeType{
+        + id_home_type: VARCHAR(10) <<PK>>
+        --
+        * name: VARCHAR(50) <<UNIQUE>> <<NOT NULL>>
+    }
+    note right of HomeType
+        Catálogo de tipos de hogar
+        (Casa, Apartamento, Apartaestudio,
+        Otro, etc.)
+    end note
+
+    entity Home{
+        + home_code: VARCHAR(10) <<PK>>
+        --
+        * name: VARCHAR(50) <<NOT NULL>>
+        * id_home_type: VARCHAR(10) <<FK>> <<NOT NULL>>
+        * address: VARCHAR(200) <<NOT NULL>>
+        * access_code: VARCHAR(8) <<UNIQUE>> <<NOT NULL>>
+        description: VARCHAR(200)
+        * creation_date: DATETIME <<NOT NULL>>
+    }
+
+    entity HomeThresholds{
+        + id_threshold: VARCHAR(10) <<PK>>
+        --
+        * id_home: VARCHAR(10) <<FK>> <<UNIQUE>> <<NOT NULL>>
+        * daily_limit: DOUBLE <<NOT NULL>>
+        * monthly_limit: DOUBLE <<NOT NULL>>
+        * use_system_defaults: BOOLEAN <<NOT NULL>>
+    }
+
+    entity UserHome{
+        + id_user: VARCHAR(10) <<PK>> <<FK>>
+        + home_code: VARCHAR(10) <<PK>> <<FK>>
+        --
+        * role: Role <<NOT NULL>>
+        * favorite: BOOLEAN <<NOT NULL>>
+    }
+
+    ' Internal relationships of Home Management module
+    Home ||--|| HomeThresholds
+    Home }o--|| HomeType: uses
+    Home ||--o{ UserHome
+    UserHome --> Role: uses
 }
 
-entity ProjectType{
-    + id_project_type: VARCHAR(10) <<PK>>
-    --
-    * name: VARCHAR(50) <<UNIQUE>> <<NOT NULL>>
+package "Devices" {
+
+    enum DeviceStatus{
+        ONLINE
+        OFFLINE
+    }
+
+    entity ApplianceType{
+        + id_appliance_type: VARCHAR(10) <<PK>>
+        --
+        * name: VARCHAR(50) <<UNIQUE>> <<NOT NULL>>
+    }
+
+    entity Device{
+        + id_device: VARCHAR(10) <<PK>>
+        --
+        * name: VARCHAR(50) <<NOT NULL>>
+        * id_appliance_type: VARCHAR(10) <<FK>> <<NOT NULL>>
+        location: VARCHAR(50)
+        description: VARCHAR(200)
+        * installation_date: DATETIME <<NOT NULL>>
+        * device_code: VARCHAR(6) <<UNIQUE>> <<NOT NULL>>
+        * api_key: VARCHAR(100) <<NOT NULL>>
+    }
+
+    entity DeviceStatusLog{
+        + id_device_status: VARCHAR(10) <<PK>>
+        --
+        * id_device: VARCHAR(10) <<FK>>
+        * status: DeviceStatus <<NOT NULL>>
+        signal_strength: INT
+        * last_seen: DATETIME <<NOT NULL>>
+    }
+
+    entity DeviceHome{
+        + id_device: VARCHAR(10) <<PK>> <<FK>>
+        + home_code: VARCHAR(10) <<PK>> <<FK>>
+    }
+
+    ' Internal relationships of devices module
+    Device }o--|| ApplianceType: uses
+    Device ||--o{ DeviceStatusLog
+    DeviceStatusLog --> DeviceStatus: uses
+    Device ||--o{ DeviceHome: uses
 }
 
-entity Project{
-    + project_code: VARCHAR(10) <<PK>>
-    --
-    * name: VARCHAR(50) <<NOT NULL>>
-    * id_project_type: VARCHAR(10) <<FK>> <<NOT NULL>>
-    other_project_type: VARCHAR(50)
-    * address: VARCHAR(200) <<NOT NULL>>
-    * access_code: VARCHAR(8) <<UNIQUE>> <<NOT NULL>>
-    description: VARCHAR(200)
-    * creation_date: DATETIME <<NOT NULL>>
+package "Monitoring and measurements" {
+
+    entity Measurement{
+        + id_measurement: VARCHAR(10) <<PK>>
+        --
+        * id_device: VARCHAR(10) <<FK>> <<NOT NULL>>
+        * date_time: DATETIME <<NOT NULL>>
+        * voltage: DOUBLE <<NOT NULL>>
+        * current: DOUBLE <<NOT NULL>>
+        * activePower: DOUBLE <<NOT NULL>>
+        * storedEnergy: DOUBLE <<NOT NULL>>
+    }
 }
 
-entity ProjectThresholds{
-    + id_threshold: VARCHAR(10) <<PK>>
-    --
-    * id_project: VARCHAR(10) <<FK>> <<UNIQUE>> <<NOT NULL>>
-    * daily_limit: DOUBLE <<NOT NULL>>
-    * monthly_limit: DOUBLE <<NOT NULL>>
-    * use_system_defaults: BOOLEAN <<NOT NULL>>
+package "Alerts" {
+
+    enum RiskConsumption{
+        LOW
+        MEDIUM
+        HIGH
+        CRITICAL
+    }
+
+    enum AlertType{
+        THRESHOLD
+        CONNECTIVITY
+    }
+
+    enum AlertStatus{
+        PENDING
+        RESOLVED
+    }
+
+    entity ConsumptionLevel{
+        + id_consumption_level: VARCHAR(10) <<PK>>
+        --
+        * name: RiskConsumption <<UNIQUE>> <<NOT NULL>>
+        * description: VARCHAR(200) <<NOT NULL>>
+        * min_limit: DOUBLE <<NOT NULL>>
+        * max_limit: DOUBLE <<NOT NULL>>
+    }
+
+    entity Alert{
+        + id_alert: VARCHAR(10) <<PK>>
+        --
+        * id_home: VARCHAR(10) <<FK>> <<NOT NULL>>
+        id_device: VARCHAR(10) <<FK>>
+        * type: AlertType <<NOT NULL>>
+        * message_key: VARCHAR(100) <<NOT NULL>>
+        * date_time: DATETIME <<NOT NULL>>
+        * alert_status: AlertStatus <<NOT NULL>>
+        id_consumption_level: VARCHAR(10) <<FK>>
+        id_measurement: VARCHAR(10) <<FK>>
+    }
+
+    note right of Alert
+        La severidad (WARNING/CRITICAL) no se
+        almacena: se deriva automáticamente en el
+        backend a partir de id_consumption_level
+        (alertas THRESHOLD) o de la regla de
+        conectividad correspondiente (alertas
+        CONNECTIVITY).
+    end note
+
+    ' Internal relationships of alerts module
+    ConsumptionLevel |o--o{ Alert: uses
+    Alert --> AlertType: uses
+    Alert --> AlertStatus: uses
+    ConsumptionLevel --> RiskConsumption: uses
 }
 
-entity ApplianceType{
-    + id_appliance_type: VARCHAR(10) <<PK>>
-    --
-    * name: VARCHAR(50) <<UNIQUE>> <<NOT NULL>>
-}
+package "Recommendations" {
 
-enum DeviceStatus{
-    ONLINE
-    OFFLINE
-}
+    enum NotificationsStatus{
+        READ
+        UNREAD
+    }
 
-entity Device{
-    + id_device: VARCHAR(10) <<PK>>
-    --
-    * name: VARCHAR(50) <<NOT NULL>>
-    * id_appliance_type: VARCHAR(10) <<FK>> <<NOT NULL>>
-    location: VARCHAR(50)
-    description: VARCHAR(200)
-    * installation_date: DATETIME <<NOT NULL>>
-    * device_code: VARCHAR(6) <<UNIQUE>> <<NOT NULL>>
-    * api_key: VARCHAR(100) <<NOT NULL>>
-}
+    entity Recommendation{
+        + id_recommendation: VARCHAR(10) <<PK>>
+        --
+        * id_home: VARCHAR(10) <<FK>> <<NOT NULL>>
+        id_device: VARCHAR(10) <<FK>>
+        * message_key: VARCHAR(100) <<NOT NULL>>
+        * date_time: DATETIME <<NOT NULL>>
+        * status: NotificationsStatus <<NOT NULL>>
+    }
 
-entity DeviceStatusLog{
-    + id_device_status: VARCHAR(10) <<PK>>
-    --
-    * id_device: VARCHAR(10) <<FK>>
-    * status: DeviceStatus <<NOT NULL>>
-    signal_strength: INT
-    * last_seen: DATETIME <<NOT NULL>>
-}
-
-entity Measurement{
-    + id_measurement: VARCHAR(10) <<PK>>
-    --
-    * id_device: VARCHAR(10) <<FK>> <<NOT NULL>>
-    * date_time: DATETIME <<NOT NULL>>
-    * voltage: DOUBLE <<NOT NULL>>
-    * current: DOUBLE <<NOT NULL>>
-    * activePower: DOUBLE <<NOT NULL>>
-    * storedEnergy: DOUBLE <<NOT NULL>>
-}
-
-enum NotificationsStatus{
-    READ
-    UNREAD
-}
-
-enum RiskConsumption{
-    LOW
-    MEDIUM
-    HIGH
-    CRITICAL
-}
-
-enum AlertType{
-    THRESHOLD
-    CONNECTIVITY
-}
-
-enum AlertSeverity{
-    WARNING
-    CRITICAL
-}
-
-enum AlertStatus{
-    PENDING
-    RESOLVED
-}
-
-entity Alert{
-    + id_alert: VARCHAR(10) <<PK>>
-    --
-    * id_project: VARCHAR(10) <<FK>> <<NOT NULL>>
-    id_device: VARCHAR(10) <<FK>>
-    * type: AlertType <<NOT NULL>>
-    * severity: AlertSeverity <<NOT NULL>>
-    * message_key: VARCHAR(100) <<NOT NULL>>
-    * date_time: DATETIME <<NOT NULL>>
-    * alert_status: AlertStatus <<NOT NULL>>
-    id_consumption_level: VARCHAR(10) <<FK>>
-    id_measurement: VARCHAR(10) <<FK>>
-}
-
-entity Recommendation{
-    + id_recommendation: VARCHAR(10) <<PK>>
-    --
-    * id_project: VARCHAR(10) <<FK>> <<NOT NULL>>
-    id_device: VARCHAR(10) <<FK>>
-    * message_key: VARCHAR(100) <<NOT NULL>>
-    * date_time: DATETIME <<NOT NULL>>
-    * status: NotificationsStatus <<NOT NULL>>
-}
-
-entity ConsumptionLevel{
-    + id_consumption_level: VARCHAR(10) <<PK>>
-    --
-    * name: RiskConsumption <<UNIQUE>> <<NOT NULL>>
-    * description: VARCHAR(200) <<NOT NULL>>
-    * min_limit: DOUBLE <<NOT NULL>>
-    * max_limit: DOUBLE <<NOT NULL>>
-}
-
-enum Role{
-    OWNER
-    MEMBER
-}
-
-entity UserProject{
-    + id_user: VARCHAR(10) <<PK>> <<FK>>
-    + project_code: VARCHAR(10) <<PK>> <<FK>>
-    --
-    * role: Role <<NOT NULL>>
-    * favorite: BOOLEAN <<NOT NULL>>
-}
-
-entity DeviceProject{
-    + id_device: VARCHAR(10) <<PK>> <<FK>>
-    + project_code: VARCHAR(10) <<PK>> <<FK>>
+    ' Internal relationships of recommendations module
+    Recommendation --> NotificationsStatus: uses
 }
 
 
-' Relationships
+' Relationships between modules
+User ||--o{ UserHome
 
-User ||--|| UserConfiguration
-User ||--o{ UserProject
-UserProject --> Role: uses
+Home ||--o{ DeviceHome
+Home ||--o{ Alert
+Home ||--o{ Recommendation
 
-Project ||--o{ UserProject
-Project ||--o{ DeviceProject
-Project ||--|| ProjectThresholds
-Project }o--|| ProjectType: uses
-Project ||--o{ Alert
-Project ||--o{ Recommendation
-
-Device }o--|| ApplianceType: uses
 Device ||--o{ Measurement
-Device ||--o{ DeviceStatusLog
-DeviceStatusLog --> DeviceStatus: uses
-Device ||--o{ DeviceProject: uses
 Device ||--o{ Alert
 Device ||--o{ Recommendation
 
-ConsumptionLevel |o--o{ Alert: uses
 Measurement |o--o{ Alert: uses
-Alert --> AlertType: uses
-Alert --> AlertSeverity: uses
-Alert --> AlertStatus: uses
-
-Recommendation --> NotificationsStatus: uses
-
-ConsumptionLevel --> RiskConsumption: uses
 
 @enduml
