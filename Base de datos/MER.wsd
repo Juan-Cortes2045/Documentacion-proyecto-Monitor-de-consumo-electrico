@@ -52,32 +52,71 @@ package "Security" {
         * expiration_at: DATETIME <<NOT NULL>>
     }
 
-    entity RefreshToken{
-        + id_refresh_token: VARCHAR(10) <<PK>>
+    entity UserSession{
+        + id_user_session: VARCHAR(10) <<PK>>
         --
         * id_user: VARCHAR(10) <<FK>> <<NOT NULL>>
-        * token: VARCHAR(255) <<UNIQUE>> <<NOT NULL>>
+        * refresh_token: VARCHAR(255) <<UNIQUE>> <<NOT NULL>>
         * revoked: BOOLEAN <<NOT NULL>>
         ip_address: VARCHAR(45)
         user_agent: VARCHAR(150)
         * created_at: DATETIME <<NOT NULL>>
         * expiration_at: DATETIME <<NOT NULL>>
+        closed_at: DATETIME
     }
 
-    entity SystemRole{
-        + id_system_role: VARCHAR(10) <<PK>>
+    entity SecurityConfiguration{
+        + id_security_configuration: VARCHAR(10) <<PK>>
         --
-        * name: VARCHAR(50) <<UNIQUE>> <<NOT NULL>>
-        description: VARCHAR(200)
-        * enabled: BOOLEAN <<NOT NULL>>
-        * created_at: DATETIME <<NOT NULL>>
+        * config_name: VARCHAR(100) <<UNIQUE>> <<NOT NULL>>
+        * config_value: VARCHAR(100) <<NOT NULL>>
+        description: VARCHAR(255)
     }
+
+
+    entity PasswordPolicy{
+        + id_password_policy: VARCHAR(10) <<PK>>
+        --
+        * min_length: INT <<NOT NULL>>
+        * max_length: INT <<NOT NULL>>
+        * require_uppercase: BOOLEAN <<NOT NULL>>
+        * require_numbers: BOOLEAN <<NOT NULL>>
+        * require_symbols: BOOLEAN <<NOT NULL>>
+        * expiration_days: INT <<NOT NULL>>
+    }
+ 
+
+    enum LoginErrorType{
+        INVALID_PASSWORD
+        USER_NOT_FOUND
+        ACCOUNT_BLOCKED
+        ACCOUNT_INACTIVE
+    }
+
+    entity LoginErrorLog{
+    + id_login_error: VARCHAR(10) <<PK>>
+    --
+    id_user: VARCHAR(10) <<FK>>
+    * error_type: LoginErrorType <<NOT NULL>>
+    description: VARCHAR(500)
+    ip_address: VARCHAR(45)
+    * created_at: DATETIME <<NOT NULL>>
+}
+
+    entity SystemRole{
+    + id_system_role: VARCHAR(10) <<PK>>
+    --
+    * name: VARCHAR(50) <<UNIQUE>> <<NOT NULL>>
+    description: VARCHAR(200)
+    * enabled: BOOLEAN <<NOT NULL>>
+    * created_at: DATETIME <<NOT NULL>>
+}
 
     entity UserSystemRole{
         + id_user: VARCHAR(10) <<PK>> <<FK>>
         + id_system_role: VARCHAR(10) <<PK>> <<FK>>
         --
-        * created_at: DATETIME <<NOT NULL>>
+        * assigned_at: DATETIME <<NOT NULL>>
     }
 
     entity Permission{
@@ -88,46 +127,13 @@ package "Security" {
         description: VARCHAR(100)
     }
 
-    entity Module{
-        + id_module: VARCHAR(10) <<PK>>
+    entity SystemRolePermission{
+        + id_system_role: VARCHAR(10) <<PK>> <<FK>>
+        + id_permission: VARCHAR(10) <<PK>> <<FK>>
         --
-        * name: VARCHAR(50) <<NOT NULL>>
-        description: VARCHAR(100)
-        icon: VARCHAR(50)
-        * order_index: INT <<NOT NULL>>
-        * enabled: BOOLEAN <<NOT NULL>>
-        * created_at: DATETIME <<NOT NULL>>
+        * assigned_at: DATETIME <<NOT NULL>>
     }
-
-    entity Form{
-        + id_form: VARCHAR(10) <<PK>>
-        --
-        * id_module: VARCHAR(10) <<FK>> <<NOT NULL>>
-        * name: VARCHAR(50) <<NOT NULL>>
-        * route: VARCHAR(100) <<NOT NULL>> <<UNIQUE>>
-        description: VARCHAR(100)
-        icon: VARCHAR(50)
-        * order_index: INT <<NOT NULL>>
-        * enabled: BOOLEAN <<NOT NULL>>
-        * created_at: DATETIME <<NOT NULL>>
-    }
-
-    entity SystemRoleFormPermission{
-        + id_role_form_permission: VARCHAR(10) <<PK>>
-        --
-        * id_system_role: VARCHAR(10) <<FK>> <<NOT NULL>>
-        * id_permission: VARCHAR(10) <<FK>> <<NOT NULL>>
-        * id_form: VARCHAR(10) <<FK>> <<NOT NULL>>
-        * enabled: BOOLEAN <<NOT NULL>>
-        * created_at: DATETIME <<NOT NULL>>
-    }
-    note right of SystemRoleFormPermission
-        UNIQUE (
-            id_system_role,
-            id_permission,
-            id_form
-        )
-    end note
+    
 
 
     enum AuditAction{
@@ -143,33 +149,29 @@ package "Security" {
         + id_audit_log: VARCHAR(10) <<PK>>
         --
         * id_user: VARCHAR(10) <<FK>> <<NOT NULL>>
-        id_permission: VARCHAR(10) <<FK>>
-        id_form: VARCHAR(10) <<FK>>
         * action: AuditAction <<NOT NULL>>
         description: VARCHAR(255)
         ip_address: VARCHAR(45)
+        application: VARCHAR(255)
         * created_at: DATETIME <<NOT NULL>>
     }
+   
 
     ' Internal relationships of security module
     Person ||--|| User
     User ||--|| UserConfiguration
     User --> UserStatus: uses
     User ||--o{ PasswordResetToken
-    User ||--o{ RefreshToken
+    User ||--o{ UserSession
+    User |o--o{ LoginErrorLog
 
     User ||--o{ UserSystemRole
     SystemRole ||--o{ UserSystemRole
 
-    SystemRole ||--o{ SystemRoleFormPermission
-    Permission ||--o{ SystemRoleFormPermission
-    Form ||--o{ SystemRoleFormPermission
-
-    Module ||--o{ Form
+    SystemRole ||--o{ SystemRolePermission
+    Permission ||--o{ SystemRolePermission
 
     User ||--o{ AuditLog
-    Permission |o--o{ AuditLog
-    Form |o--o{ AuditLog
     AuditLog --> AuditAction: uses
 }
 
