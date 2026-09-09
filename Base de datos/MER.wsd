@@ -194,7 +194,7 @@ package "Home Management" {
     end note
 
     entity Home{
-        + home_code: VARCHAR(10) <<PK>>
+        + id_home: VARCHAR(10) <<PK>>
         --
         * name: VARCHAR(50) <<NOT NULL>>
         * id_home_type: VARCHAR(10) <<FK>> <<NOT NULL>>
@@ -215,7 +215,7 @@ package "Home Management" {
 
     entity UserHome{
         + id_user: VARCHAR(10) <<PK>> <<FK>>
-        + home_code: VARCHAR(10) <<PK>> <<FK>>
+        + id_home: VARCHAR(10) <<PK>> <<FK>>
         --
         * role: Role <<NOT NULL>>
         * favorite: BOOLEAN <<NOT NULL>>
@@ -264,7 +264,7 @@ package "Devices" {
 
     entity DeviceHome{
         + id_device: VARCHAR(10) <<PK>> <<FK>>
-        + home_code: VARCHAR(10) <<PK>> <<FK>>
+        + id_home: VARCHAR(10) <<PK>> <<FK>>
     }
 
     ' Internal relationships of devices module
