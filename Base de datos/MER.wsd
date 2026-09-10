@@ -1,5 +1,15 @@
 @startuml mer
 
+note top
+    Convención global de auditoría para todas las entidades del MER:
+    - id: UUID <<PK>> DEFAULT gen_random_uuid() (o equivalente según la base de datos)
+    - created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+    - updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+    - deleted_at: TIMESTAMPTZ
+    Eliminación suave por defecto: no se usan DELETE físicos;
+    deleted_at IS NOT NULL indica que el registro está eliminado.
+end note
+
 package "Security" {
 
     enum UserStatus{
@@ -16,6 +26,9 @@ package "Security" {
         cellphone: VARCHAR(15)
         address: VARCHAR(200)
         profile_image: VARCHAR(255)
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity User{
@@ -29,6 +42,9 @@ package "Security" {
         * status: UserStatus <<NOT NULL>>
         * failed_login_attempts: INT <<NOT NULL>>
         last_login_at: DATETIME
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity UserConfiguration{
@@ -40,6 +56,9 @@ package "Security" {
         colorTheme: VARCHAR(50)
         language: VARCHAR(50)
         socialProvider: VARCHAR(50)
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity PasswordResetToken{
@@ -50,6 +69,8 @@ package "Security" {
         * used: BOOLEAN <<NOT NULL>>
         * created_at: DATETIME <<NOT NULL>>
         * expiration_at: DATETIME <<NOT NULL>>
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity UserSession{
@@ -63,6 +84,8 @@ package "Security" {
         * created_at: DATETIME <<NOT NULL>>
         * expiration_at: DATETIME <<NOT NULL>>
         closed_at: DATETIME
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity SecurityConfiguration{
@@ -71,6 +94,9 @@ package "Security" {
         * config_name: VARCHAR(100) <<UNIQUE>> <<NOT NULL>>
         * config_value: VARCHAR(100) <<NOT NULL>>
         description: VARCHAR(255)
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
 
@@ -83,6 +109,9 @@ package "Security" {
         * require_numbers: BOOLEAN <<NOT NULL>>
         * require_symbols: BOOLEAN <<NOT NULL>>
         * expiration_days: INT <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
  
 
@@ -101,6 +130,8 @@ package "Security" {
     description: VARCHAR(500)
     ip_address: VARCHAR(45)
     * created_at: DATETIME <<NOT NULL>>
+    * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+    deleted_at: TIMESTAMPTZ
 }
 
     entity SystemRole{
@@ -110,6 +141,8 @@ package "Security" {
     description: VARCHAR(200)
     * enabled: BOOLEAN <<NOT NULL>>
     * created_at: DATETIME <<NOT NULL>>
+    * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+    deleted_at: TIMESTAMPTZ
 }
 
     entity UserSystemRole{
@@ -117,6 +150,9 @@ package "Security" {
         + id_system_role: VARCHAR(10) <<PK>> <<FK>>
         --
         * assigned_at: DATETIME <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity Permission{
@@ -125,6 +161,9 @@ package "Security" {
         * code: VARCHAR(30) <<UNIQUE>> <<NOT NULL>>
         * name: VARCHAR(50) <<NOT NULL>>
         description: VARCHAR(100)
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity SystemRolePermission{
@@ -132,6 +171,9 @@ package "Security" {
         + id_permission: VARCHAR(10) <<PK>> <<FK>>
         --
         * assigned_at: DATETIME <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
     
 
@@ -154,6 +196,8 @@ package "Security" {
         ip_address: VARCHAR(45)
         application: VARCHAR(255)
         * created_at: DATETIME <<NOT NULL>>
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
    
 
@@ -186,6 +230,9 @@ package "Home Management" {
         + id_home_type: VARCHAR(10) <<PK>>
         --
         * name: VARCHAR(50) <<UNIQUE>> <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
     note right of HomeType
         Catálogo de tipos de hogar
@@ -202,6 +249,9 @@ package "Home Management" {
         * access_code: VARCHAR(8) <<UNIQUE>> <<NOT NULL>>
         description: VARCHAR(200)
         * creation_date: DATETIME <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity HomeThresholds{
@@ -211,6 +261,9 @@ package "Home Management" {
         * daily_limit: DOUBLE <<NOT NULL>>
         * monthly_limit: DOUBLE <<NOT NULL>>
         * use_system_defaults: BOOLEAN <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity UserHome{
@@ -219,6 +272,9 @@ package "Home Management" {
         --
         * role: Role <<NOT NULL>>
         * favorite: BOOLEAN <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     ' Internal relationships of Home Management module
@@ -239,6 +295,9 @@ package "Devices" {
         + id_appliance_type: VARCHAR(10) <<PK>>
         --
         * name: VARCHAR(50) <<UNIQUE>> <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity Device{
@@ -251,6 +310,9 @@ package "Devices" {
         * installation_date: DATETIME <<NOT NULL>>
         * device_code: VARCHAR(6) <<UNIQUE>> <<NOT NULL>>
         * api_key: VARCHAR(100) <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity DeviceStatusLog{
@@ -260,11 +322,18 @@ package "Devices" {
         * status: DeviceStatus <<NOT NULL>>
         signal_strength: INT
         * last_seen: DATETIME <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity DeviceHome{
         + id_device: VARCHAR(10) <<PK>> <<FK>>
         + id_home: VARCHAR(10) <<PK>> <<FK>>
+        --
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     ' Internal relationships of devices module
@@ -285,6 +354,9 @@ package "Monitoring and measurements" {
         * current: DOUBLE <<NOT NULL>>
         * activePower: DOUBLE <<NOT NULL>>
         * storedEnergy: DOUBLE <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 }
 
@@ -314,6 +386,9 @@ package "Alerts" {
         * description: VARCHAR(200) <<NOT NULL>>
         * min_limit: DOUBLE <<NOT NULL>>
         * max_limit: DOUBLE <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     entity Alert{
@@ -327,6 +402,9 @@ package "Alerts" {
         * alert_status: AlertStatus <<NOT NULL>>
         id_consumption_level: VARCHAR(10) <<FK>>
         id_measurement: VARCHAR(10) <<FK>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     note right of Alert
@@ -360,6 +438,9 @@ package "Recommendations" {
         * message_key: VARCHAR(100) <<NOT NULL>>
         * date_time: DATETIME <<NOT NULL>>
         * status: NotificationsStatus <<NOT NULL>>
+        * created_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        * updated_at: TIMESTAMPTZ <<NOT NULL>> DEFAULT NOW()
+        deleted_at: TIMESTAMPTZ
     }
 
     ' Internal relationships of recommendations module
