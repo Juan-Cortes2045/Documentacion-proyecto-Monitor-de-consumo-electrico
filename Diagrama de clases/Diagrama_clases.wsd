@@ -1,5 +1,9 @@
 @startuml diagrama_clases
 
+' ============================================================
+' STRATEGY PATTERN
+' ============================================================
+
 package Strategy_Pattern{
 
     interface UserPermissions {
@@ -11,11 +15,17 @@ package Strategy_Pattern{
         + canManageDevices() : boolean
         + canManageHome() : boolean
     }
+
     class OwnerPermissions implements UserPermissions {
         + canManageDevices() : boolean
         + canManageHome() : boolean
     }
 }
+
+
+' ============================================================
+' SINGLETON PATTERN
+' ============================================================
 
 package Singleton_Pattern{
 
@@ -23,16 +33,24 @@ package Singleton_Pattern{
         - instance : SystemConfig {static}
         - defaultDailyLimit : double
         - defaultMonthlyLimit : double
-        - defaultLanguage: String
+        - defaultLanguage : String
+
         - SystemConfig()
+
         + getInstance() : SystemConfig {static}
         + getDefaultDailyLimit() : double
         + getDefaultMonthlyLimit() : double
-        + getDefaultLanguage(): String
+        + getDefaultLanguage() : String
     }
 }
 
+
+' ============================================================
+' ENUMS
+' ============================================================
+
 package enums{
+
     enum DeviceStatus{
         ONLINE
         OFFLINE
@@ -50,21 +68,17 @@ package enums{
         CONNECTIVITY
     }
 
-    enum AlertSeverity{
-        WARNING
-        CRITICAL
-    }
-    note bottom of AlertSeverity
-        No se persiste. Se calcula
-        en backend a partir de
-        ConsumptionLevel (THRESHOLD)
-        o de la regla de conectividad
-        (CONNECTIVITY).
-    end note
-
     enum AlertStatus{
         PENDING
         RESOLVED
+    }
+
+    enum RecommendationType{
+        SAVING
+        PEAK_HOURS
+        HIGH_CONSUMPTION
+        HISTORICAL_COMPARISON
+        THRESHOLD
     }
 
     enum NotificationsStatus{
@@ -100,6 +114,11 @@ package enums{
     }
 }
 
+
+' ============================================================
+' SECURITY DOMAIN
+' ============================================================
+
 package Domain_Security{
 
     class Person {
@@ -109,50 +128,71 @@ package Domain_Security{
         - cellphone : String
         - address : String
         - profileImage : String
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + updateInfo() : void
     }
 
     class User {
         - idUser : String
+        - personId : String
         - passwordHash : String
         - email : String
         - emailVerified : boolean
-        - dateOfRegistration : Date
+        - registrationDate : DateTime
         - status : UserStatus
         - failedLoginAttempts : int
         - lastLoginAt : DateTime
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + register() : void
         + login() : void
         + logout() : void
         + updateInfo() : void
         + deleteAccount() : void
         + requestPasswordReset() : PasswordResetToken
-        + resetPassword(token : PasswordResetToken, newPassword : String) : void
+        + resetPassword(token : PasswordResetToken,
+                        newPassword : String) : void
     }
 
     class UserConfiguration {
+        - idConfiguration : String
+        - userId : String
         - notifyByEmail : boolean
         - notifyByPush : boolean
-        - colorTheme: String
-        - language: String
-        - socialProvider: String
+        - colorTheme : String
+        - language : String
+        - socialProvider : String
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + configureNotifications() : void
-        + changeColorTheme(): void
-        + changeLanguage():void
+        + changeColorTheme() : void
+        + changeLanguage() : void
     }
 
     class PasswordResetToken {
         - idResetToken : String
+        - userId : String
         - resetToken : String
         - used : boolean
         - createdAt : DateTime
         - expirationAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + isExpired() : boolean
         + markAsUsed() : void
     }
 
     class UserSession {
         - idUserSession : String
+        - userId : String
         - refreshToken : String
         - revoked : boolean
         - ipAddress : String
@@ -160,6 +200,9 @@ package Domain_Security{
         - createdAt : DateTime
         - expirationAt : DateTime
         - closedAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + revoke() : void
         + close() : void
         + isValid() : boolean
@@ -170,6 +213,9 @@ package Domain_Security{
         - configName : String
         - configValue : String
         - description : String
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 
     class PasswordPolicy {
@@ -180,19 +226,31 @@ package Domain_Security{
         - requireNumbers : boolean
         - requireSymbols : boolean
         - expirationDays : int
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + validate(password : String) : boolean
     }
 
     class LoginErrorLog {
         - idLoginError : String
+        - userId : String
         - errorType : LoginErrorType
         - description : String
         - ipAddress : String
         - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 }
 
-package Domain_Access-Control{
+
+' ============================================================
+' ACCESS CONTROL DOMAIN
+' ============================================================
+
+package Domain_Access_Control{
 
     class SystemRole {
         - idSystemRole : String
@@ -200,10 +258,17 @@ package Domain_Access-Control{
         - description : String
         - enabled : boolean
         - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 
     class UserSystemRole {
+        - userId : String
+        - systemRoleId : String
         - assignedAt : DateTime
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 
     class Permission {
@@ -211,79 +276,127 @@ package Domain_Access-Control{
         - code : String
         - name : String
         - description : String
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 
     class SystemRolePermission {
+        - systemRoleId : String
+        - permissionId : String
         - assignedAt : DateTime
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 
     class AuditLog {
         - idAuditLog : String
+        - userId : String
         - action : AuditAction
         - description : String
         - ipAddress : String
         - application : String
         - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 }
 
-package Domain_Home-Management{
+
+' ============================================================
+' HOME MANAGEMENT DOMAIN
+' ============================================================
+
+package Domain_Home_Management{
 
     class HomeType {
         - idHomeType : String
         - name : String
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 
     class HomeThresholds {
         - idThreshold : String
+        - homeId : String
         - dailyLimit : double
         - monthlyLimit : double
-        - useSystemDefaults : boolean
+        - useSystemDefault : boolean
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + resetToDefaults() : void
     }
 
     class Home{
-        - idHome: String
-        - name: String
-        - address: String
-        - accessCode: String
-        - description: String
-        - creationDate: Date
-        + addDevice(d: Device): void
-        + removeDevice(d: Device): void
-        + addUser(u: User, role: Role): void
-        + removeUser(u: User): void
-        + updateThresholds(daily: double, monthly: double): void
-        + getAllDevices(): List<Device>
+        - idHome : String
+        - name : String
+        - homeTypeId : String
+        - address : String
+        - accessCode : String
+        - description : String
+        - creationDate : DateTime
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
+        + addDevice(d : Device) : void
+        + removeDevice(d : Device) : void
+        + addUser(u : User, role : Role) : void
+        + removeUser(u : User) : void
+        + updateThresholds(daily : double, monthly : double) : void
+        + getAllDevices() : List<Device>
     }
 
     class UserHome {
+        - userId : String
+        - homeId : String
         - role : Role
         - favorite : boolean
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + toggleFavorite() : void
         + leaveHome() : void
         + getPermissions() : UserPermissions
     }
 }
 
+
+' ============================================================
+' DEVICES DOMAIN
+' ============================================================
+
 package Domain_Devices{
 
     class ApplianceType {
         - idApplianceType : String
         - name : String
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 
     class Device {
         - idDevice : String
         - name : String
+        - applianceTypeId : String
         - location : String
         - description : String
-        - installationDate : Date
+        - installationDate : DateTime
         - deviceCode : String
         - apiKey : String
-        - observers : List<MeasurementObserver>
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + takeMeasurement() : Measurement
-        + updateStatus(status : DeviceStatus, signal : int) : void
+        + updateStatus(status : DeviceStatus,
+                       signal : int) : void
         + getCurrentStatus() : DeviceStatusLog
         + subscribe(o : MeasurementObserver) : void
         + unsubscribe(o : MeasurementObserver) : void
@@ -292,149 +405,310 @@ package Domain_Devices{
 
     class DeviceStatusLog {
         - idDeviceStatus : String
+        - deviceId : String
         - status : DeviceStatus
         - signalStrength : int
         - lastSeen : DateTime
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+    }
+
+    class DeviceHome {
+        - deviceId : String
+        - homeId : String
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 }
 
+
+' ============================================================
+' MONITORING DOMAIN
+' ============================================================
+
 package Domain_Measurements{
+
     class Measurement {
         - idMeasurement : String
-        - datetime : LocalDateTime
+        - deviceId : String
+        - dateTime : DateTime
         - voltage : double
         - current : double
         - activePower : double
         - storedEnergy : double
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + getVoltage() : double
         + getCurrent() : double
         + getActivePower() : double
         + getStoredEnergy() : double
     }
 
-package Observer_Pattern{
-    interface MeasurementObserver {
-        + onMeasurement(m : Measurement) : void
+    class ConsumptionLevel{
+        - idConsumptionLevel : String
+        - name : RiskConsumption
+        - description : String
+        - minLimit : double
+        - maxLimit : double
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 
-    class AlertObserver implements MeasurementObserver {
-        + onMeasurement(m : Measurement) : void
-    }
 
-    class RecommendationObserver implements MeasurementObserver {
-        + onMeasurement(m : Measurement) : void
+    package Observer_Pattern{
+
+        interface MeasurementObserver {
+            + onMeasurement(m : Measurement) : void
+        }
+
+        class AlertObserver implements MeasurementObserver {
+            + onMeasurement(m : Measurement) : void
+        }
+
+        class RecommendationObserver implements MeasurementObserver {
+            + onMeasurement(m : Measurement) : void
+        }
     }
 }
 
+
+' ============================================================
+' NOTIFICATIONS DOMAIN
+' ============================================================
+
 package Domain_Notifications{
+
     abstract class Notification {
         - messageKey : String
         - home : Home
         - device : Device
-        - datetime : LocalDateTime
-        + generate() : void
-        + send() : void
+        - dateTime : DateTime
     }
-    class ConsumptionLevel{
-        - idConsumptionLevel: String
-        - name: RiskConsumption
-        - description: String
-        - minLimit: double
-        - maxLimit: double
-    }
+
     class Alert extends Notification {
         - idAlert : String
+        - homeId : String
+        - deviceId : String
         - type : AlertType
-        - status : AlertStatus
-        - consumptionLevel : ConsumptionLevel
-        - measurement : Measurement
+        - dateTime : DateTime
+        - alertStatus : AlertStatus
+        - consumptionLevelId : String
+        - measurementId : String
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + resolveAlert() : void
-        + getSeverity() : AlertSeverity
     }
 
     class Recommendation extends Notification {
         - idRecommendation : String
+        - homeId : String
+        - deviceId : String
+        - type : RecommendationType
+        - dateTime : DateTime
         - status : NotificationsStatus
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
         + markAsRead() : void
-        + applyRecommendation(): void
+        + markAsUnread() : void
+    }
+
+    class RecommendationAnalyzer {
+        + analyze(
+            measurements : List<Measurement>,
+            thresholds : HomeThresholds
+          ) : List<Recommendation>
+
+        + detectPatterns(
+            measurements : List<Measurement>
+          ) : List<RecommendationType>
+
+        + generateRecommendation(
+            type : RecommendationType,
+            home : Home,
+            device : Device
+          ) : Recommendation
     }
 }
 
+
+' ============================================================
+' FACTORY METHOD PATTERN
+' ============================================================
+
 package Factory_Method_Pattern{
+
     abstract class NotificationFactory {
-        + createFromMeasurement(m : Measurement, risk : RiskConsumption) : Notification
-        + createFromDeviceStatus(home : Home, device : Device) : Notification
+        + createFromMeasurement(
+            m : Measurement,
+            risk : RiskConsumption
+          ) : Notification
+
+        + createFromDeviceStatus(
+            home : Home,
+            device : Device
+          ) : Notification
     }
 
     class AlertFactory extends NotificationFactory {
-        + createFromMeasurement(m : Measurement, risk : RiskConsumption) : Alert
-        + createFromDeviceStatus(home : Home, device : Device) : Alert
+        + createFromMeasurement(
+            m : Measurement,
+            risk : RiskConsumption
+          ) : Alert
+
+        + createFromDeviceStatus(
+            home : Home,
+            device : Device
+          ) : Alert
     }
 
-    class RecommendationFactory extends NotificationFactory {
-        + createFromMeasurement(m : Measurement, risk : RiskConsumption) : Recommendation
-        + createFromDeviceStatus(home : Home, device : Device) : Recommendation
+    class RecommendationFactory {
+        + create(
+            type : RecommendationType,
+            home : Home,
+            device : Device
+          ) : Recommendation
     }
 }
 
-' ==================== Relationships ====================
 
-' Strategy (ligado a UserHome porque el rol es por hogar, no global)
+' ============================================================
+' RELATIONSHIPS
+' ============================================================
+
+' ----------------------------
+' Strategy
+' ----------------------------
+
 UserHome ..> UserPermissions : use
 UserHome ..> Role : use
 
+
+' ----------------------------
 ' Singleton
+' ----------------------------
+
 UserConfiguration ..> SystemConfig
 User ..> SystemConfig : use
 HomeThresholds ..> SystemConfig : use defaults
 
-' Security - identidad y sesión
+
+' ----------------------------
+' Security
+' ----------------------------
+
 Person "1" -- "1" User
+
 User "1" *-- "1" UserConfiguration
+
 User "1" -- "0..*" PasswordResetToken
 User "1" -- "0..*" UserSession
 User "0..1" -- "0..*" LoginErrorLog
+
 User ..> UserStatus : use
 LoginErrorLog ..> LoginErrorType : use
 
-' Access control (RBAC)
+
+' ----------------------------
+' Access Control
+' ----------------------------
+
 User "1" -- "0..*" UserSystemRole
 SystemRole "1" -- "0..*" UserSystemRole
+
 SystemRole "1" -- "0..*" SystemRolePermission
 Permission "1" -- "0..*" SystemRolePermission
-User "1" -- "0..*" AuditLog
+
+User "0..1" -- "0..*" AuditLog
 AuditLog ..> AuditAction : use
 
-' Home management
-User "1" -- "0..*" UserHome
-Home "1" -- "0..*" UserHome
-Home "1" *-- "1" HomeThresholds
-Home "*" o-- "1" HomeType : uses
-Home "0..*" o-- "0..*" Device : uses
-Home "1" o-- "0..*" Alert
-Home "1" o-- "0..*" Recommendation
 
+' ----------------------------
+' Home Management
+' ----------------------------
+
+Home "*" o-- "1" HomeType : uses
+Home "1" *-- "1" HomeThresholds
+Home "1" -- "0..*" UserHome
+
+UserHome ..> User : references
+UserHome ..> Role : use
+
+
+' ----------------------------
 ' Devices
+' ----------------------------
+
 Device "*" o-- "1" ApplianceType : uses
+
 Device "1" *-- "0..*" DeviceStatusLog
 DeviceStatusLog ..> DeviceStatus : use
-Device "1" o-- "0..*" Alert
-Device "1" o-- "0..*" Recommendation
 
-' Measurements
-Device "1" *-- "0..*" Measurement
+Device "1" -- "0..*" DeviceHome
 
-' Observer
+
+' ----------------------------
+' Monitoring
+' ----------------------------
+
+Device ..> Measurement : references
+Measurement ..> Device : references
+
+ConsumptionLevel ..> RiskConsumption : use
+
+
+' ----------------------------
+' Observer Pattern
+' ----------------------------
+
 Device ..> MeasurementObserver : notify
 
-' Factory Method
-AlertFactory ..> Alert : create
-RecommendationFactory ..> Recommendation : create
-Alert ..> RiskConsumption
-Alert ..> AlertType
-Alert ..> AlertStatus
-Alert ..> AlertSeverity
-Recommendation ..> NotificationsStatus
-ConsumptionLevel ..> RiskConsumption
+AlertObserver ..> AlertFactory : uses
+
+RecommendationObserver ..> RecommendationAnalyzer : uses
+
+
+' ----------------------------
+' Alerts
+' ----------------------------
+
+Alert ..> AlertType : use
+Alert ..> AlertStatus : use
+Alert ..> ConsumptionLevel : references
+Alert ..> Measurement : references
+
+
+' ----------------------------
+' Recommendations
+' ----------------------------
+
+Recommendation ..> RecommendationType : use
+Recommendation ..> NotificationsStatus : use
+
+RecommendationAnalyzer ..> Measurement : analyzes
+RecommendationAnalyzer ..> HomeThresholds : uses
+RecommendationAnalyzer ..> RecommendationFactory : uses
+
+RecommendationFactory ..> Recommendation : creates
+
+
+' ----------------------------
+' Cross-context references
+' ----------------------------
+
+Home ..> Device : references
+Home ..> Alert : references
+Home ..> Recommendation : references
+
+Device ..> Alert : references
+Device ..> Recommendation : references
 
 @enduml

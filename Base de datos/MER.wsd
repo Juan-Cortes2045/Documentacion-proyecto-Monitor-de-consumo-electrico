@@ -488,6 +488,14 @@ package "Alerts" {
 
 package "Recommendations" {
 
+    enum RecommendationType{
+        SAVING
+        PEAK_HOURS
+        HIGH_CONSUMPTION
+        HISTORICAL_COMPARISON
+        THRESHOLD
+    }
+
     enum NotificationsStatus{
         READ
         UNREAD
@@ -498,6 +506,7 @@ package "Recommendations" {
         --
         * home_id: VARCHAR(10) <<NOT NULL>>
         device_id: VARCHAR(10)
+        * type: RecommendationType <<NOT NULL>>
         * message_key: VARCHAR(100) <<NOT NULL>>
         * date_time: TIMESTAMP <<NOT NULL>>
         * status: NotificationsStatus <<NOT NULL>>
@@ -508,6 +517,7 @@ package "Recommendations" {
 
     ' Internal relationships of Recommendations context
 
+    Recommendation --> RecommendationType: uses
     Recommendation --> NotificationsStatus: uses
 
     note right of Recommendation
@@ -515,7 +525,35 @@ package "Recommendations" {
         - home_id → Home
         - device_id → Device
 
-        No generan foreign keys SQL.
+        Estas referencias NO generan foreign keys SQL.
+
+        Las recomendaciones son generadas automáticamente
+        mediante el análisis del historial de consumo,
+        mediciones, niveles de consumo, límites configurados
+        y patrones de consumo.
+
+        Una recomendación puede originarse a partir
+        del análisis de múltiples mediciones.
+
+        Las mediciones NO se almacenan como referencias
+        directas dentro de Recommendation.
+
+        device_id es opcional:
+        - NULL cuando la recomendación corresponde al hogar.
+        - NOT NULL cuando está relacionada con un dispositivo.
+
+        El sistema genera inicialmente las recomendaciones
+        con status UNREAD.
+
+        El usuario puede cambiar el estado entre:
+        READ y UNREAD.
+
+        RecommendationType identifica el motivo de generación:
+        - SAVING
+        - PEAK_HOURS
+        - HIGH_CONSUMPTION
+        - HISTORICAL_COMPARISON
+        - THRESHOLD
     end note
 }
 
