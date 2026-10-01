@@ -252,7 +252,7 @@ package "Security" {
     User ||--o{ PasswordResetToken
     User ||--o{ UserSession
     UserSession ||--o{ RefreshToken
-    RefreshToken o|--o{ RefreshToken: parent_id
+    RefreshToken |o--o{ RefreshToken: parent_id
     User |o--o{ LoginErrorLog
 
     User ||--o{ UserSystemRole
