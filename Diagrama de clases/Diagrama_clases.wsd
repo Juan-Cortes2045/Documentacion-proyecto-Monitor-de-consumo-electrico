@@ -126,14 +126,13 @@ package Domain_Security{
         - name : String
         - lastName : String
         - cellphone : String
-        - address : String
-        - profileImage : String
-        - createdAt : DateTime
-        - updatedAt : DateTime
-        - deletedAt : DateTime
 
-        + updateInfo() : void
+        + rename(name : String, lastName : String) : void
+        + updateCellphone(cellphone : String) : void
     }
+
+    ' The avatar belongs to the account, not to the human, so it lives on User.
+    ' person.address was removed: home.address is the authoritative copy.
 
     class User {
         - idUser : String
@@ -145,18 +144,19 @@ package Domain_Security{
         - status : UserStatus
         - failedLoginAttempts : int
         - lastLoginAt : DateTime
-        - createdAt : DateTime
-        - updatedAt : DateTime
-        - deletedAt : DateTime
+        - profileImage : String
 
-        + register() : void
-        + login() : void
-        + logout() : void
-        + updateInfo() : void
-        + deleteAccount() : void
-        + requestPasswordReset() : PasswordResetToken
-        + resetPassword(token : PasswordResetToken,
-                        newPassword : String) : void
+        + canAuthenticate() : boolean
+        + changePassword(newHash : PasswordHash) : void
+        + changeEmail(newEmail : Email) : void
+        + changeProfileImage(profileImage : String) : void
+        + verifyEmail() : void
+        + activate() : void
+        + deactivate() : void
+        + block() : void
+        + incrementFailedLoginAttempts() : void
+        + resetFailedLoginAttempts() : void
+        + recordSuccessfulLogin(instant : DateTime) : void
     }
 
     class UserConfiguration {
@@ -193,19 +193,56 @@ package Domain_Security{
     class UserSession {
         - idUserSession : String
         - userId : String
-        - refreshToken : String
-        - revoked : boolean
-        - ipAddress : String
-        - userAgent : String
         - createdAt : DateTime
         - expirationAt : DateTime
+        - ipAddress : String
+        - userAgent : String
+        - revoked : boolean
+        - revokedAt : DateTime
+        - revokedReason : RevocationReason
         - closedAt : DateTime
-        - updatedAt : DateTime
-        - deletedAt : DateTime
 
-        + revoke() : void
-        + close() : void
-        + isValid() : boolean
+        + rotate(newExpiration : DateTime,
+                 rotatedAt : DateTime) : void
+        + revoke(revokedAt : DateTime,
+                 reason : RevocationReason) : void
+        + close(instant : DateTime) : void
+        + isExpired(now : DateTime) : boolean
+        + isActive(now : DateTime) : boolean
+    }
+
+    class RefreshToken {
+        - idRefreshToken : String
+        - userSessionId : String
+        - familyId : String
+        - parentId : String
+        - tokenHash : String
+        - status : RefreshTokenStatus
+        - createdAt : DateTime
+        - expiresAt : DateTime
+        - rotatedAt : DateTime
+        - revokedAt : DateTime
+        - revokedReason : RevocationReason
+
+        + isExpired(now : DateTime) : boolean
+        + isUsable(now : DateTime) : boolean
+        + isReplayed() : boolean
+        + rotate(rotatedAt : DateTime) : void
+        + revoke(revokedAt : DateTime,
+                 reason : RevocationReason) : void
+    }
+
+    enum RevocationReason {
+        REFRESH_TOKEN_REUSE
+        PASSWORD_CHANGED
+        ADMINISTRATIVE
+    }
+
+    enum RefreshTokenStatus {
+        ACTIVE
+        ROTATED
+        REVOKED
+        EXPIRED
     }
 
     class SecurityConfiguration {
@@ -611,6 +648,11 @@ User "1" *-- "1" UserConfiguration
 
 User "1" -- "0..*" PasswordResetToken
 User "1" -- "0..*" UserSession
+UserSession "1" *-- "1..*" RefreshToken
+RefreshToken "0..1" -- "1" RefreshToken : parent
+RefreshToken ..> RefreshTokenStatus : use
+UserSession ..> RevocationReason : use
+RefreshToken ..> RevocationReason : use
 User "0..1" -- "0..*" LoginErrorLog
 
 User ..> UserStatus : use
