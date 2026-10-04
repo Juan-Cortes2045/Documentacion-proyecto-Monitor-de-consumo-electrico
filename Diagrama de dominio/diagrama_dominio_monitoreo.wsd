@@ -1,0 +1,212 @@
+@startuml diagrama_dominio_monitoreo
+
+title Diagrama de Dominio - Hogar, Umbrales y Monitoreo
+
+legend top
+    Diagrama de dominio de Energy Monitor.
+
+    Propósito: modelar el hogar (Home), sus umbrales de consumo,
+    los dispositivos, las mediciones, los niveles de consumo,
+    las alertas, las recomendaciones y el registro de entrega
+    de notificaciones.
+
+    Convenciones:
+
+    - Los límites de consumo viven en HomeThresholds, son por hogar
+      y no en UserConfiguration.
+    - ConsumptionLevel utiliza cuatro rangos: LOW, MEDIUM, HIGH, CRITICAL.
+    - Measurement (medición) es por dispositivo. No existe una entidad
+      de "historial de consumo" independiente; el historial es el
+      conjunto de Measurement.
+    - Alert y Recommendation son eventos de sus respectivos contextos.
+    - Notification es el registro de ENTREGA de un mensaje al usuario
+      (por canal), separado del evento que lo originó. Se referencia
+      por sourceType + sourceId.
+
+    Elementos clave:
+
+    - Home, HomeType, HomeThresholds
+    - ApplianceType, Device, DeviceStatusLog, DeviceHome
+    - Measurement
+    - ConsumptionLevel
+    - Alert, Recommendation
+    - Notification
+
+    Notas:
+
+    - HomeThresholds.useSystemDefault indica si debe usarse un
+      valor por defecto. En el modelo actual dicho valor por
+      defecto no está definido en ninguna estructura persistente
+      (hueco de diseño documentado).
+    - deliveryStatus y readAt son ciclos distintos: una alerta
+      entregada no implica que esté resuelta.
+endlegend
+
+entity Home {
+    - name : String
+    - address : String
+    - accessCode : String
+    - description : String
+    - creationDate : DateTime
+}
+
+entity HomeType {
+    - name : String
+}
+
+entity HomeThresholds {
+    - dailyLimit : double
+    - monthlyLimit : double
+    - useSystemDefault : boolean
+}
+
+entity ApplianceType {
+    - name : String
+}
+
+entity Device {
+    - name : String
+    - model : String
+    - location : String
+    - state : String
+}
+
+entity DeviceStatusLog {
+    - status : String
+    - timestamp : DateTime
+}
+
+entity DeviceHome {
+    - assignedAt : DateTime
+}
+
+entity Measurement {
+    - dateTime : DateTime
+    - value : double
+    - unit : String
+    - voltage : double
+    - current : double
+    - activePower : double
+    - storedEnergy : double
+}
+
+enum RiskConsumption {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+}
+
+entity ConsumptionLevel {
+    - name : RiskConsumption
+    - description : String
+    - minLimit : double
+    - maxLimit : double
+}
+
+enum AlertType {
+    THRESHOLD
+    CONNECTIVITY
+}
+
+enum AlertStatus {
+    PENDING
+    RESOLVED
+}
+
+entity Alert {
+    - type : AlertType
+    - messageKey : String
+    - dateTime : DateTime
+    - alertStatus : AlertStatus
+}
+
+enum RecommendationType {
+    SAVING
+    PEAK_HOURS
+    HIGH_CONSUMPTION
+    HISTORICAL_COMPARISON
+    THRESHOLD
+}
+
+enum NotificationsStatus {
+    READ
+    UNREAD
+}
+
+entity Recommendation {
+    - type : RecommendationType
+    - messageKey : String
+    - dateTime : DateTime
+    - status : NotificationsStatus
+}
+
+enum NotificationChannel {
+    EMAIL
+    PUSH
+}
+
+enum NotificationSourceType {
+    ALERT
+    RECOMMENDATION
+}
+
+enum NotificationDeliveryStatus {
+    PENDING
+    SENT
+    FAILED
+}
+
+entity Notification {
+    - userId : String
+    - homeId : String
+    - channel : NotificationChannel
+    - sourceType : NotificationSourceType
+    - sourceId : String
+    - messageKey : String
+    - deliveryStatus : NotificationDeliveryStatus
+    - sentAt : DateTime
+    - readAt : DateTime
+    - failureReason : String
+}
+
+Home "*" o-- "1" HomeType
+Home "1" -- "1" HomeThresholds
+Home "1" -- "0..*" DeviceHome
+Device "*" o-- "1" ApplianceType
+Device "1" -- "0..*" DeviceStatusLog
+Device "1" -- "0..*" Measurement
+Device "1" -- "0..*" DeviceHome
+Measurement "1" -- "0..*" Alert
+ConsumptionLevel ..> RiskConsumption
+ConsumptionLevel "1" -- "0..*" Alert
+Alert ..> AlertType
+Alert ..> AlertStatus
+Recommendation ..> RecommendationType
+Recommendation ..> NotificationsStatus
+Notification ..> NotificationChannel
+Notification ..> NotificationSourceType
+Notification ..> NotificationDeliveryStatus
+
+note bottom of HomeThresholds
+    Los límites son por hogar,
+    no por usuario.
+    Flag useSystemDefault apunta a
+    un default no definido actualmente
+    (hueco de diseño).
+end note
+
+note right of Measurement
+    No existe entidad "HistorialDeConsumo".
+    El historial es el conjunto de Measurement
+    por dispositivo.
+end note
+
+note right of Notification
+    Notification registra la ENTREGA,
+    no el evento. Referencia Alert
+    o Recommendation por
+    sourceType + sourceId.
+end note
+
+@enduml

@@ -13,13 +13,13 @@
         <mxCell id="48beIwC9yNsx9pyfUsxh-4" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="48beIwC9yNsx9pyfUsxh-3">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="48beIwC9yNsx9pyfUsxh-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Acceder al modulo de proyectos&amp;nbsp;" vertex="1">
+        <mxCell id="48beIwC9yNsx9pyfUsxh-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Acceder al modulo de hogares&amp;nbsp;" vertex="1">
           <mxGeometry height="60" width="339" x="340" y="120" as="geometry" />
         </mxCell>
         <mxCell id="48beIwC9yNsx9pyfUsxh-6" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="48beIwC9yNsx9pyfUsxh-5">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="48beIwC9yNsx9pyfUsxh-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Seleccionar opción &quot;Registrar nuevo proyecto&quot;" vertex="1">
+        <mxCell id="48beIwC9yNsx9pyfUsxh-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Seleccionar opción &quot;Registrar nuevo hogar&quot;" vertex="1">
           <mxGeometry height="60" width="339" x="340" y="220" as="geometry" />
         </mxCell>
         <mxCell id="48beIwC9yNsx9pyfUsxh-10" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="48beIwC9yNsx9pyfUsxh-9">
@@ -30,7 +30,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="48beIwC9yNsx9pyfUsxh-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Ingresar datos del proyecto" vertex="1">
+        <mxCell id="48beIwC9yNsx9pyfUsxh-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Ingresar datos del hogar" vertex="1">
           <mxGeometry height="60" width="339" x="340" y="310" as="geometry" />
         </mxCell>
         <mxCell id="48beIwC9yNsx9pyfUsxh-7" parent="1" style="ellipse;html=1;shape=startState;fillColor=#000000;strokeColor=#ff0000;" value="" vertex="1">
@@ -63,7 +63,7 @@
         <mxCell id="48beIwC9yNsx9pyfUsxh-21" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="48beIwC9yNsx9pyfUsxh-20">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="48beIwC9yNsx9pyfUsxh-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Guardar proyecto en el sistema" vertex="1">
+        <mxCell id="48beIwC9yNsx9pyfUsxh-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Guardar hogar en el sistema" vertex="1">
           <mxGeometry height="60" width="339" x="860" y="570" as="geometry" />
         </mxCell>
         <mxCell id="48beIwC9yNsx9pyfUsxh-19" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="48beIwC9yNsx9pyfUsxh-18">
@@ -78,13 +78,13 @@
         <mxCell id="48beIwC9yNsx9pyfUsxh-23" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="48beIwC9yNsx9pyfUsxh-22">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="48beIwC9yNsx9pyfUsxh-20" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Seleccionar proyecto registrado" vertex="1">
+        <mxCell id="48beIwC9yNsx9pyfUsxh-20" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Seleccionar hogar registrado" vertex="1">
           <mxGeometry height="60" width="339" x="190" y="720" as="geometry" />
         </mxCell>
         <mxCell id="48beIwC9yNsx9pyfUsxh-25" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="48beIwC9yNsx9pyfUsxh-24">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="48beIwC9yNsx9pyfUsxh-22" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Vincular dispositivo al proyecto" vertex="1">
+        <mxCell id="48beIwC9yNsx9pyfUsxh-22" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Vincular dispositivo al hogar" vertex="1">
           <mxGeometry height="60" width="339" x="190" y="820" as="geometry" />
         </mxCell>
         <mxCell id="48beIwC9yNsx9pyfUsxh-27" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="48beIwC9yNsx9pyfUsxh-26">
@@ -115,7 +115,7 @@
         <mxCell id="l31sZurwVGBG2xfHLlar-10" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="48beIwC9yNsx9pyfUsxh-37">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="48beIwC9yNsx9pyfUsxh-28" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Asignar dispositivo al proyecto" vertex="1">
+        <mxCell id="48beIwC9yNsx9pyfUsxh-28" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Asignar dispositivo al hogar" vertex="1">
           <mxGeometry height="60" width="339" x="120" y="1240" as="geometry" />
         </mxCell>
         <mxCell id="l31sZurwVGBG2xfHLlar-9" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l31sZurwVGBG2xfHLlar-7">
@@ -127,7 +127,7 @@
         <mxCell id="48beIwC9yNsx9pyfUsxh-40" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="48beIwC9yNsx9pyfUsxh-39">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="48beIwC9yNsx9pyfUsxh-37" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Vincular usuarios al proyecto" vertex="1">
+        <mxCell id="48beIwC9yNsx9pyfUsxh-37" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Vincular usuarios al hogar" vertex="1">
           <mxGeometry height="60" width="339" x="120" y="1370" as="geometry" />
         </mxCell>
         <mxCell id="48beIwC9yNsx9pyfUsxh-43" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="48beIwC9yNsx9pyfUsxh-42">
@@ -182,7 +182,7 @@
         <mxCell id="48beIwC9yNsx9pyfUsxh-58" edge="1" parent="1" source="48beIwC9yNsx9pyfUsxh-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="48beIwC9yNsx9pyfUsxh-57">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="48beIwC9yNsx9pyfUsxh-55" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Confirmar configuración de proyecto" vertex="1">
+        <mxCell id="48beIwC9yNsx9pyfUsxh-55" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Confirmar configuración de hogar" vertex="1">
           <mxGeometry height="60" width="339" x="300" y="2100" as="geometry" />
         </mxCell>
         <mxCell id="48beIwC9yNsx9pyfUsxh-57" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" value="" vertex="1">

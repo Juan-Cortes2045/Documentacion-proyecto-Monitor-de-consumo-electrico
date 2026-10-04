@@ -51,7 +51,6 @@ package "Security" {
         --
         * name: VARCHAR(100) <<NOT NULL>>
         * last_name: VARCHAR(100) <<NOT NULL>>
-        cellphone: VARCHAR(15)
         * created_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         * updated_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         deleted_at: TIMESTAMP
@@ -577,6 +576,87 @@ package "Recommendations" {
 }
 
 
+package "Notifications" {
+
+    enum NotificationChannel{
+        EMAIL
+        PUSH
+    }
+
+    enum NotificationSourceType{
+        ALERT
+        RECOMMENDATION
+    }
+
+    enum NotificationDeliveryStatus{
+        PENDING
+        SENT
+        FAILED
+    }
+
+    entity Notification{
+        + id_notification: VARCHAR(10) <<PK>>
+        --
+        * user_id: VARCHAR(10) <<NOT NULL>>
+        home_id: VARCHAR(10)
+        * channel: NotificationChannel <<NOT NULL>>
+        * source_type: NotificationSourceType <<NOT NULL>>
+        source_id: VARCHAR(10)
+        * message_key: VARCHAR(100) <<NOT NULL>>
+        * delivery_status: NotificationDeliveryStatus <<NOT NULL>>
+        sent_at: TIMESTAMP
+        read_at: TIMESTAMP
+        failure_reason: VARCHAR(200)
+        * created_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
+        * updated_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
+        deleted_at: TIMESTAMP
+    }
+
+    ' Una notificación registra la ENTREGA de un mensaje, no el evento
+    ' que lo originator. Alert y Recommendation siguen siendo eventos
+    ' de sus propios contextos.
+
+    Notification --> NotificationChannel: uses
+    Notification --> NotificationSourceType: uses
+    Notification --> NotificationDeliveryStatus: uses
+
+    note right of Notification
+        Una notificación es el registro de que un mensaje
+        llegó al usuario, no del hecho que lo generó.
+
+        Responde a una pregunta que Alert y Recommendation
+        no pueden responder: si el usuario lo recibió,
+        por qué canal y si lo leyó.
+
+        source_type + source_id localizan la fila origen
+        sin acoplar este contexto al esquema de los otros.
+
+        user_id → User (contexto Security)
+        home_id → Home (contexto Home Management)
+        Ninguna de las dos genera foreign key SQL.
+
+        channel se elige según las preferencias del destinatario:
+        - EMAIL cuando user_configuration.notify_by_email es verdadero
+        - PUSH cuando user_configuration.notify_by_push es verdadero
+
+        delivery_status y read_at son ciclos distintos:
+        - delivery_status: PENDING, SENT, FAILED
+        - read_at: NULL mientras no se ha leído
+
+        Una alerta entregada no es una alerta resuelta.
+        Por eso read_at es independiente de delivery_status
+        y de alert.alert_status (PENDING / RESOLVED).
+
+        source_type identifica el contexto que originó el mensaje:
+        - ALERT
+        - RECOMMENDATION
+
+        failure_reason guarda la causa del fallo cuando
+        delivery_status es FAILED.
+    end note
+}
+
+
 ' ============================================================
 ' CROSS-CONTEXT APPLICATION REFERENCES
 ' ============================================================
@@ -605,5 +685,11 @@ Home .. Recommendation: referencia de aplicación
 
 ' Devices → Recommendations
 Device .. Recommendation: referencia de aplicación
+
+' Alerts → Notifications
+Alert .. Notification: referencia de aplicación
+
+' Recommendations → Notifications
+Recommendation .. Notification: referencia de aplicación
 
 @enduml

@@ -1,0 +1,113 @@
+@startuml diagrama_dominio_usuario
+
+title Diagrama de Dominio - Identidad, Acceso y Roles
+
+legend top
+    Diagrama de dominio de Energy Monitor.
+
+    Propósito: modelar la identidad (Person/User), la configuración
+    de la cuenta, el control de acceso por roles (doble sistema) y
+    la pertenencia de un usuario a uno o más hogares con su rol.
+
+    Convenciones:
+
+    - Persona guarda datos propios (nombre, apellido).
+    - User guarda credenciales y estado de la cuenta (correo,
+      contraseña e imagen de perfil).
+    - UserConfiguration guarda preferencias únicamente: notificar
+      por correo, notificar por push, tema, idioma y proveedor
+      social. No contiene límites de consumo.
+    - RBAC global: SystemRole / UserSystemRole / Permission /
+      SystemRolePermission. Cadena: User → UserSystemRole →
+      SystemRole → SystemRolePermission → Permission.
+    - Rol por hogar: enum Role {OWNER, MEMBER} y UserHome,
+      con el atributo favorite. Este rol es independiente
+      del RBAC global.
+
+    Elementos clave:
+
+    - Person: identidad humana.
+    - User: credencial de acceso asociada a una Person.
+    - UserConfiguration: preferencias de entrega y apariencia.
+    - Role (OWNER, MEMBER): rol del usuario dentro de un hogar.
+    - UserHome: pertenencia a un hogar con rol y favorito.
+    - SystemRole, Permission, UserSystemRole, SystemRolePermission:
+      control de acceso basado en permisos.
+
+    Notas:
+
+    - Los límites de consumo pertenecen al hogar (HomeThresholds),
+      no a la configuración del usuario.
+    - El rol global y el rol por hogar son dos sistemas separados.
+endlegend
+
+entity Person {
+    - name : String
+    - lastName : String
+}
+
+entity User {
+    - email : String
+    - passwordHash : String
+    - profileImage : String
+}
+
+entity UserConfiguration {
+    - notifyByEmail : boolean
+    - notifyByPush : boolean
+    - colorTheme : String
+    - language : String
+    - socialProvider : String
+}
+
+enum Role {
+    OWNER
+    MEMBER
+}
+
+entity UserHome {
+    - role : Role
+    - favorite : boolean
+}
+
+entity SystemRole {
+    - name : String
+    - description : String
+    - enabled : boolean
+}
+
+entity UserSystemRole {
+    - assignedAt : DateTime
+}
+
+entity Permission {
+    - code : String
+    - name : String
+    - description : String
+}
+
+entity SystemRolePermission {
+    - assignedAt : DateTime
+}
+
+Person "1" -- "1" User
+User "1" -- "1" UserConfiguration : configures
+User "1" -- "0..*" UserSystemRole
+SystemRole "1" -- "0..*" UserSystemRole
+SystemRole "1" -- "0..*" SystemRolePermission
+Permission "1" -- "0..*" SystemRolePermission
+User "1" -- "0..*" UserHome
+UserHome ..> Role
+
+note right of Role
+    OWNER / MEMBER
+    (home-scoped)
+end note
+
+note right of SystemRole
+    RBAC global,
+    independiente del rol
+    por hogar
+end note
+
+@enduml

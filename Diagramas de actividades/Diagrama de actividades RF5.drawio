@@ -104,7 +104,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="GgveI9tU_YCEl1clzlac-19" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Asociar dispositivo al proyecto" vertex="1">
+        <mxCell id="GgveI9tU_YCEl1clzlac-19" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Asociar dispositivo al hogar" vertex="1">
           <mxGeometry height="40" width="120" x="224" y="60" as="geometry" />
         </mxCell>
         <mxCell id="GgveI9tU_YCEl1clzlac-86" edge="1" parent="1" source="GgveI9tU_YCEl1clzlac-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="GgveI9tU_YCEl1clzlac-82">

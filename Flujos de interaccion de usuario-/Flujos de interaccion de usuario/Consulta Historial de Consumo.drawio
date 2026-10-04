@@ -62,13 +62,13 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="grQ_Ghd4VG_18WxiHW6--14" value="¿Usuario desea exportar datos?" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--14" value="" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
           <mxGeometry x="420" y="790" width="230" height="50" as="geometry" />
         </mxCell>
         <mxCell id="grQ_Ghd4VG_18WxiHW6--22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--16" target="grQ_Ghd4VG_18WxiHW6--21">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="grQ_Ghd4VG_18WxiHW6--16" value="Permitir exportar a PDF o Excel" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="grQ_Ghd4VG_18WxiHW6--16" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="300" y="870" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="grQ_Ghd4VG_18WxiHW6--23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="grQ_Ghd4VG_18WxiHW6--17" target="grQ_Ghd4VG_18WxiHW6--21">

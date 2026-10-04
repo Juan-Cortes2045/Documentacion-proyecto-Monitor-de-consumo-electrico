@@ -20,28 +20,22 @@ package Strategy_Pattern{
         + canManageDevices() : boolean
         + canManageHome() : boolean
     }
-}
 
+    note as N_StrategyPending
+        PENDIENTE DE IMPLEMENTACIÓN
 
-' ============================================================
-' SINGLETON PATTERN
-' ============================================================
+        Estas tres clases expresan la intención de una
+        autorización por tipo de rol para el contexto Home.
 
-package Singleton_Pattern{
+        Ninguna existe todavía en el código Java. La
+        autorización real se resuelve hoy por la cadena RBAC
+        genérica de cinco tablas, consultada en vivo desde
+        CheckPermission, que no contiene lógica por rol.
 
-    class SystemConfig {
-        - instance : SystemConfig {static}
-        - defaultDailyLimit : double
-        - defaultMonthlyLimit : double
-        - defaultLanguage : String
-
-        - SystemConfig()
-
-        + getInstance() : SystemConfig {static}
-        + getDefaultDailyLimit() : double
-        + getDefaultMonthlyLimit() : double
-        + getDefaultLanguage() : String
-    }
+        El enum Role (OWNER / MEMBER) existe únicamente como
+        ENUM de MySQL en user_home, sin clase que lo mapee
+        y sin entidad, mapper ni puerto para user_home.
+    end note
 }
 
 
@@ -86,6 +80,22 @@ package enums{
         UNREAD
     }
 
+    enum NotificationChannel{
+        EMAIL
+        PUSH
+    }
+
+    enum NotificationSourceType{
+        ALERT
+        RECOMMENDATION
+    }
+
+    enum NotificationDeliveryStatus{
+        PENDING
+        SENT
+        FAILED
+    }
+
     enum Role{
         OWNER
         MEMBER
@@ -125,14 +135,13 @@ package Domain_Security{
         - idPerson : String
         - name : String
         - lastName : String
-        - cellphone : String
 
         + rename(name : String, lastName : String) : void
-        + updateCellphone(cellphone : String) : void
     }
 
     ' The avatar belongs to the account, not to the human, so it lives on User.
     ' person.address was removed: home.address is the authoritative copy.
+    ' person.cellphone was removed: the account is identified by email.
 
     class User {
         - idUser : String
@@ -338,6 +347,13 @@ package Domain_Access_Control{
         - updatedAt : DateTime
         - deletedAt : DateTime
     }
+
+    ' CheckPermission es la única vía de autorización real. Resuelve la cadena
+    ' RBAC de cinco tablas contra el estado vivo, sin lógica por tipo de rol
+    ' y sin roles embebidos en el JWT.
+    class CheckPermission {
+        + check(idUser : String, permissionCode : String) : boolean
+    }
 }
 
 
@@ -520,18 +536,12 @@ package Domain_Measurements{
 
 package Domain_Notifications{
 
-    abstract class Notification {
-        - messageKey : String
-        - home : Home
-        - device : Device
-        - dateTime : DateTime
-    }
-
-    class Alert extends Notification {
+    class Alert {
         - idAlert : String
         - homeId : String
         - deviceId : String
         - type : AlertType
+        - messageKey : String
         - dateTime : DateTime
         - alertStatus : AlertStatus
         - consumptionLevelId : String
@@ -543,11 +553,12 @@ package Domain_Notifications{
         + resolveAlert() : void
     }
 
-    class Recommendation extends Notification {
+    class Recommendation {
         - idRecommendation : String
         - homeId : String
         - deviceId : String
         - type : RecommendationType
+        - messageKey : String
         - dateTime : DateTime
         - status : NotificationsStatus
         - createdAt : DateTime
@@ -556,6 +567,32 @@ package Domain_Notifications{
 
         + markAsRead() : void
         + markAsUnread() : void
+    }
+
+    ' Notification es el registro de la ENTREGA de un mensaje, no el evento
+    ' que lo originator. Por eso deja de ser la clase base de Alert y
+    ' Recommendation: son tablas independientes de sus propios contextos,
+    ' y esta los referencia por sourceType + sourceId.
+
+    class Notification {
+        - idNotification : String
+        - userId : String
+        - homeId : String
+        - channel : NotificationChannel
+        - sourceType : NotificationSourceType
+        - sourceId : String
+        - messageKey : String
+        - deliveryStatus : NotificationDeliveryStatus
+        - sentAt : DateTime
+        - readAt : DateTime
+        - failureReason : String
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+
+        + markAsSent(sentAt : DateTime) : void
+        + markAsFailed(reason : String) : void
+        + markAsRead(readAt : DateTime) : void
     }
 
     class RecommendationAnalyzer {
@@ -574,6 +611,17 @@ package Domain_Notifications{
             device : Device
           ) : Recommendation
     }
+
+    note as N_NotificationDelivery
+        Una notificación registra que un mensaje LLEGÓ al usuario,
+        no el hecho que lo generó.
+
+        deliveryStatus y readAt son ciclos distintos:
+        una alerta entregada no es una alerta resuelta.
+
+        channel se elige según las preferencias del destinatario
+        en UserConfiguration: notifyByEmail y notifyByPush.
+    end note
 }
 
 
@@ -583,19 +631,7 @@ package Domain_Notifications{
 
 package Factory_Method_Pattern{
 
-    abstract class NotificationFactory {
-        + createFromMeasurement(
-            m : Measurement,
-            risk : RiskConsumption
-          ) : Notification
-
-        + createFromDeviceStatus(
-            home : Home,
-            device : Device
-          ) : Notification
-    }
-
-    class AlertFactory extends NotificationFactory {
+    class AlertFactory {
         + createFromMeasurement(
             m : Measurement,
             risk : RiskConsumption
@@ -613,6 +649,20 @@ package Factory_Method_Pattern{
             home : Home,
             device : Device
           ) : Recommendation
+    }
+
+    class NotificationFactory {
+        + createForAlert(
+            alert : Alert,
+            recipient : User,
+            channel : NotificationChannel
+          ) : Notification
+
+        + createForRecommendation(
+            recommendation : Recommendation,
+            recipient : User,
+            channel : NotificationChannel
+          ) : Notification
     }
 }
 
@@ -633,9 +683,15 @@ UserHome ..> Role : use
 ' Singleton
 ' ----------------------------
 
-UserConfiguration ..> SystemConfig
-User ..> SystemConfig : use
-HomeThresholds ..> SystemConfig : use defaults
+' SystemConfig se eliminó de este diagrama. No existe ninguna tabla ni clase
+' Java que sostenga defaultDailyLimit ni defaultMonthlyLimit. La única
+' estructura de configuración del sistema es SecurityConfiguration, un par
+' genérico nombre/valor.
+'
+' HUECO DE DISEÑO: home_thresholds.use_system_default es una bandera que
+' referencia un valor por defecto que no está definido en ninguna parte. Se
+' reporta para decisión de backend: o se siembra una fila
+' default_daily_limit en security_configuration, o se retira la bandera.
 
 
 ' ----------------------------
@@ -671,6 +727,12 @@ Permission "1" -- "0..*" SystemRolePermission
 
 User "0..1" -- "0..*" AuditLog
 AuditLog ..> AuditAction : use
+
+CheckPermission ..> User : verifies
+CheckPermission ..> Permission : resolves
+CheckPermission ..> UserSystemRole : traverses
+CheckPermission ..> SystemRole : traverses
+CheckPermission ..> SystemRolePermission : traverses
 
 
 ' ----------------------------
@@ -740,6 +802,23 @@ RecommendationAnalyzer ..> HomeThresholds : uses
 RecommendationAnalyzer ..> RecommendationFactory : uses
 
 RecommendationFactory ..> Recommendation : creates
+
+
+' ----------------------------
+' Notifications
+' ----------------------------
+
+Notification ..> NotificationChannel : use
+Notification ..> NotificationSourceType : use
+Notification ..> NotificationDeliveryStatus : use
+
+Notification ..> User : recipient
+Notification ..> Home : scoped to
+
+NotificationFactory ..> Notification : creates
+NotificationFactory ..> Alert : delivers
+NotificationFactory ..> Recommendation : delivers
+NotificationFactory ..> UserConfiguration : reads channel preference
 
 
 ' ----------------------------
