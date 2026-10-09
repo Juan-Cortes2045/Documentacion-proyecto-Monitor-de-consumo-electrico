@@ -50,7 +50,7 @@ package "Security" {
         + id_person: VARCHAR(10) <<PK>>
         --
         * name: VARCHAR(100) <<NOT NULL>>
-        * last_name: VARCHAR(100) <<NOT NULL>>
+        last_name: VARCHAR(100)
         * created_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         * updated_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         deleted_at: TIMESTAMP
@@ -67,11 +67,20 @@ package "Security" {
         * status: UserStatus <<NOT NULL>>
         * failed_login_attempts: INT <<NOT NULL>>
         last_login_at: TIMESTAMP
-        profile_image: VARCHAR(255)
+        profile_image: MEDIUMTEXT
+        google_subject: VARCHAR(255) <<UNIQUE>>
         * created_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         * updated_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         deleted_at: TIMESTAMP
     }
+
+    note right of User
+        google_subject: sub de la cuenta de
+        Google en cuentas creadas con Google;
+        NULL en cuentas con contraseña.
+        person.last_name admite NULL (una
+        cuenta de Google puede no tener apellido).
+    end note
 
     entity UserConfiguration{
         + id_configuration: VARCHAR(10) <<PK>>
@@ -91,8 +100,9 @@ package "Security" {
         + id_reset_token: VARCHAR(10) <<PK>>
         --
         * user_id: VARCHAR(10) <<FK>> <<NOT NULL>>
-        * reset_token: VARCHAR(100) <<UNIQUE>> <<NOT NULL>>
+        * reset_token_hash: VARCHAR(64) <<UNIQUE>> <<NOT NULL>>
         * used: BOOLEAN <<NOT NULL>>
+        * attempts: INT <<NOT NULL>> DEFAULT 0
         * created_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         * expiration_at: TIMESTAMP <<NOT NULL>>
         * updated_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
@@ -281,6 +291,12 @@ package "Home Management" {
         deleted_at: TIMESTAMP
     }
 
+    note right of HomeType
+        Valores sembrados: house, apartment,
+        studio, country_house, cabin, other.
+    end note
+
+
     entity Home{
         + id_home: VARCHAR(10) <<PK>>
         --
@@ -302,6 +318,7 @@ package "Home Management" {
         * daily_limit: DOUBLE <<NOT NULL>>
         * monthly_limit: DOUBLE <<NOT NULL>>
         * use_system_default: BOOLEAN <<NOT NULL>>
+        * limit_period: ENUM('DAILY','MONTHLY') <<NOT NULL>>
         * created_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         * updated_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         deleted_at: TIMESTAMP
@@ -371,7 +388,7 @@ package "Devices" {
         * device_id: VARCHAR(10) <<FK>>
         * status: DeviceStatus <<NOT NULL>>
         signal_strength: INT
-        * last_seen: TIMESTAMP <<NOT NULL>>
+        * last_seen: TIMESTAMP(6) <<NOT NULL>>
         * created_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         * updated_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         deleted_at: TIMESTAMP
@@ -453,6 +470,8 @@ package "Alerts" {
     enum AlertType{
         THRESHOLD
         CONNECTIVITY
+        DEVICE
+        LIMIT
     }
 
     enum AlertStatus{
@@ -496,6 +515,17 @@ package "Alerts" {
         consumption_level_id y measurement_id
         deben ser NULL.
 
+        DEVICE:
+        alerta informativa (un módulo vinculado al hogar
+        envió su primera lectura tras la vinculación).
+        consumption_level_id y measurement_id deben ser NULL.
+
+        LIMIT:
+        el hogar alcanzó su límite diario o mensual
+        (alert.limit.daily / alert.limit.monthly). Es a nivel
+        de hogar: device_id, consumption_level_id y
+        measurement_id deben ser NULL.
+
         Las reglas se validan en dominio/aplicación.
     end note
 
@@ -514,7 +544,7 @@ package "Recommendations" {
         THRESHOLD
     }
 
-    enum NotificationsStatus{
+    enum RecommendationStatus{
         READ
         UNREAD
     }
@@ -527,7 +557,7 @@ package "Recommendations" {
         * type: RecommendationType <<NOT NULL>>
         * message_key: VARCHAR(100) <<NOT NULL>>
         * date_time: TIMESTAMP <<NOT NULL>>
-        * status: NotificationsStatus <<NOT NULL>>
+        * status: RecommendationStatus <<NOT NULL>>
         * created_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         * updated_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
         deleted_at: TIMESTAMP
@@ -536,7 +566,7 @@ package "Recommendations" {
     ' Internal relationships of Recommendations context
 
     Recommendation --> RecommendationType: uses
-    Recommendation --> NotificationsStatus: uses
+    Recommendation --> RecommendationStatus: uses
 
     note right of Recommendation
         Referencias de aplicación:
@@ -561,10 +591,8 @@ package "Recommendations" {
         - NOT NULL cuando está relacionada con un dispositivo.
 
         El sistema genera inicialmente las recomendaciones
-        con status UNREAD.
-
-        El usuario puede cambiar el estado entre:
-        READ y UNREAD.
+        con status UNREAD. El usuario solo puede marcarlas
+        como READ (no se vuelve a UNREAD).
 
         RecommendationType identifica el motivo de generación:
         - SAVING
@@ -620,6 +648,31 @@ package "Notifications" {
     Notification --> NotificationSourceType: uses
     Notification --> NotificationDeliveryStatus: uses
 
+    entity NotificationPreference{
+        + user_id: VARCHAR(10) <<PK>>
+        --
+        * email_enabled: BOOLEAN <<NOT NULL>> DEFAULT true
+        * push_enabled: BOOLEAN <<NOT NULL>> DEFAULT true
+        * created_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
+        * updated_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
+        deleted_at: TIMESTAMP
+    }
+
+    entity PushSubscription{
+        + id_push_subscription: VARCHAR(10) <<PK>>
+        --
+        * user_id: VARCHAR(10) <<NOT NULL>>
+        * endpoint: VARCHAR(500) <<UNIQUE>> <<NOT NULL>>
+        * p256dh: VARCHAR(100) <<NOT NULL>>
+        * auth: VARCHAR(50) <<NOT NULL>>
+        * created_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
+        * updated_at: TIMESTAMP <<NOT NULL>> DEFAULT CURRENT_TIMESTAMP
+        deleted_at: TIMESTAMP
+    }
+
+    NotificationPreference ..> Notification: preferencias de canal
+    PushSubscription ..> Notification: canal PUSH
+
     note right of Notification
         Una notificación es el registro de que un mensaje
         llegó al usuario, no del hecho que lo generó.
@@ -635,9 +688,16 @@ package "Notifications" {
         home_id → Home (contexto Home Management)
         Ninguna de las dos genera foreign key SQL.
 
-        channel se elige según las preferencias del destinatario:
-        - EMAIL cuando user_configuration.notify_by_email es verdadero
-        - PUSH cuando user_configuration.notify_by_push es verdadero
+        channel se elige según las preferencias del destinatario
+        (notification_preference, una fila por usuario):
+        - EMAIL cuando email_enabled es verdadero
+        - PUSH cuando push_enabled es verdadero
+        Sin fila se aplican los valores por defecto (ambos activos).
+
+        push_subscription guarda cada navegador suscrito a Web Push:
+        endpoint identifica la instalación del navegador y
+        p256dh/auth son las claves con las que se cifra el payload
+        (RFC 8291). Se elimina junto con la cuenta.
 
         delivery_status y read_at son ciclos distintos:
         - delivery_status: PENDING, SENT, FAILED
@@ -691,5 +751,9 @@ Alert .. Notification: referencia de aplicación
 
 ' Recommendations → Notifications
 Recommendation .. Notification: referencia de aplicación
+
+' Security → Notifications
+User .. NotificationPreference: referencia de aplicación
+User .. PushSubscription: referencia de aplicación
 
 @enduml
