@@ -60,6 +60,8 @@ package enums{
     enum AlertType{
         THRESHOLD
         CONNECTIVITY
+        DEVICE
+        LIMIT
     }
 
     enum AlertStatus{
@@ -75,7 +77,7 @@ package enums{
         THRESHOLD
     }
 
-    enum NotificationsStatus{
+    enum RecommendationStatus{
         READ
         UNREAD
     }
@@ -94,6 +96,11 @@ package enums{
         PENDING
         SENT
         FAILED
+    }
+
+    enum LimitPeriod{
+        DAILY
+        MONTHLY
     }
 
     enum Role{
@@ -142,6 +149,7 @@ package Domain_Security{
     ' The avatar belongs to the account, not to the human, so it lives on User.
     ' person.address was removed: home.address is the authoritative copy.
     ' person.cellphone was removed: the account is identified by email.
+    ' person.lastName is optional: a Google account may not have a family name.
 
     class User {
         - idUser : String
@@ -154,6 +162,7 @@ package Domain_Security{
         - failedLoginAttempts : int
         - lastLoginAt : DateTime
         - profileImage : String
+        - googleSubject : String
 
         + canAuthenticate() : boolean
         + changePassword(newHash : PasswordHash) : void
@@ -166,6 +175,7 @@ package Domain_Security{
         + incrementFailedLoginAttempts() : void
         + resetFailedLoginAttempts() : void
         + recordSuccessfulLogin(instant : DateTime) : void
+        + bindGoogleAccount(googleSubject : String) : void
     }
 
     class UserConfiguration {
@@ -188,15 +198,19 @@ package Domain_Security{
     class PasswordResetToken {
         - idResetToken : String
         - userId : String
-        - resetToken : String
+        - resetTokenHash : String
         - used : boolean
+        - attempts : int
         - createdAt : DateTime
         - expirationAt : DateTime
         - updatedAt : DateTime
         - deletedAt : DateTime
 
-        + isExpired() : boolean
-        + markAsUsed() : void
+        + clearToken() : Optional<String>
+        + isExpired(now : Instant) : boolean
+        + isValid(now : Instant) : boolean
+        + hasAttemptsLeft() : boolean
+        + markUsed() : void
     }
 
     class UserSession {
@@ -377,11 +391,12 @@ package Domain_Home_Management{
         - dailyLimit : double
         - monthlyLimit : double
         - useSystemDefault : boolean
+        - limitPeriod : LimitPeriod
         - createdAt : DateTime
         - updatedAt : DateTime
         - deletedAt : DateTime
 
-        + resetToDefaults() : void
+        + resetToDefaults(daily : double, monthly : double) : void
     }
 
     class Home{
@@ -522,11 +537,100 @@ package Domain_Measurements{
         class AlertObserver implements MeasurementObserver {
             + onMeasurement(m : Measurement) : void
         }
-
-        class RecommendationObserver implements MeasurementObserver {
-            + onMeasurement(m : Measurement) : void
-        }
     }
+}
+
+
+' ============================================================
+' RECOMMENDATIONS MODULE
+' ============================================================
+
+package Application_Recommendations{
+
+    class RecommendationRules {
+        + evaluate(
+            now : Instant,
+            zone : ZoneId,
+            devices : List<MonitoredDevice>,
+            samples : List<HourSample>,
+            limit : Optional<ConsumptionLimit>
+          ) : List<Suggestion>
+
+        + dataFrom(now : Instant, zone : ZoneId) : Instant
+
+        + peakHours(lastWeek : List<HourSample>, zone : ZoneId) : Optional<Suggestion>
+        + standby(deviceId : String, samples : List<HourSample>, now : Instant, zone : ZoneId) : Optional<Suggestion>
+        + weekOverWeek(lastWeek : List<HourSample>, previousWeek : List<HourSample>) : Optional<Suggestion>
+        + limitProjection(limit : ConsumptionLimit, samples : List<HourSample>, now : Instant, zone : ZoneId) : Optional<Suggestion>
+        + deviceIncrease(deviceId : String, deviceSamples : List<HourSample>, now : Instant) : Optional<Suggestion>
+    }
+
+    class EvaluateRecommendationsService {
+        + evaluateAll() : int
+        + evaluateHome(homeId : String) : int
+    }
+
+    class RecommendationInboxService {
+        + list(userId : String, homeId : String) : List<RecommendationView>
+        + markRead(userId : String, idRecommendation : String) : RecommendationView
+        + delete(userId : String, idRecommendation : String) : void
+        + deleteRead(userId : String, homeId : String) : int
+    }
+
+    class RecommendationScheduler {
+        + run() : void
+    }
+
+    class Suggestion {
+        - type : RecommendationType
+        - deviceId : String
+        - messageKey : String
+    }
+
+    class MonitoredDevice {
+        - deviceId : String
+        - alwaysOn : boolean
+    }
+
+    class HourSample {
+        - deviceId : String
+        - hourStart : Instant
+        - averagePower : double
+        - energy : double
+    }
+
+    enum Period {
+        DAILY
+        MONTHLY
+    }
+
+    class ConsumptionLimit {
+        - period : Period
+        - kwh : double
+    }
+
+    class RecommendationCreated {
+        - idRecommendation : String
+        - homeId : String
+        - deviceId : String
+        - type : RecommendationType
+        - messageKey : String
+        - dateTime : Instant
+    }
+
+    note as N_RecommendationRules
+        La generación es por evaluación periódica (scheduler
+        cada hora), no por patrón Observer.
+
+        RecommendationRules es un servicio de dominio puro
+        (sin I/O ni framework): recibe muestras horarias y
+        umbrales y devuelve Suggestion.
+
+        EvaluateRecommendationsService persiste con cool-down
+        de 7 días por hogar + tipo + dispositivo y publica
+        RecommendationCreated, que notification entrega por
+        email y web push.
+    end note
 }
 
 
@@ -560,13 +664,13 @@ package Domain_Notifications{
         - type : RecommendationType
         - messageKey : String
         - dateTime : DateTime
-        - status : NotificationsStatus
+        - status : RecommendationStatus
         - createdAt : DateTime
         - updatedAt : DateTime
         - deletedAt : DateTime
 
-        + markAsRead() : void
-        + markAsUnread() : void
+        + markRead() : void
+        + isRead() : boolean
     }
 
     ' Notification es el registro de la ENTREGA de un mensaje, no el evento
@@ -595,21 +699,24 @@ package Domain_Notifications{
         + markAsRead(readAt : DateTime) : void
     }
 
-    class RecommendationAnalyzer {
-        + analyze(
-            measurements : List<Measurement>,
-            thresholds : HomeThresholds
-          ) : List<Recommendation>
+    class NotificationPreference {
+        - userId : String
+        - emailEnabled : boolean
+        - pushEnabled : boolean
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
+    }
 
-        + detectPatterns(
-            measurements : List<Measurement>
-          ) : List<RecommendationType>
-
-        + generateRecommendation(
-            type : RecommendationType,
-            home : Home,
-            device : Device
-          ) : Recommendation
+    class PushSubscription {
+        - idPushSubscription : String
+        - userId : String
+        - endpoint : String
+        - p256dh : String
+        - auth : String
+        - createdAt : DateTime
+        - updatedAt : DateTime
+        - deletedAt : DateTime
     }
 
     note as N_NotificationDelivery
@@ -641,14 +748,6 @@ package Factory_Method_Pattern{
             home : Home,
             device : Device
           ) : Alert
-    }
-
-    class RecommendationFactory {
-        + create(
-            type : RecommendationType,
-            home : Home,
-            device : Device
-          ) : Recommendation
     }
 
     class NotificationFactory {
@@ -683,15 +782,15 @@ UserHome ..> Role : use
 ' Singleton
 ' ----------------------------
 
-' SystemConfig se eliminó de este diagrama. No existe ninguna tabla ni clase
-' Java que sostenga defaultDailyLimit ni defaultMonthlyLimit. La única
-' estructura de configuración del sistema es SecurityConfiguration, un par
-' genérico nombre/valor.
+' SystemConfig se eliminó de este diagrama. Los límites por defecto del
+' sistema no viven en la base de datos: se leen de la configuración de la
+' aplicación (home.defaults.daily-limit = 6 kWh y home.defaults.monthly-limit
+' = 180 kWh) a través de SystemDefaultsPort / HomeProperties. La única
+' estructura de configuración persistente del sistema es SecurityConfiguration,
+' un par genérico nombre/valor.
 '
-' HUECO DE DISEÑO: home_thresholds.use_system_default es una bandera que
-' referencia un valor por defecto que no está definido en ninguna parte. Se
-' reporta para decisión de backend: o se siembra una fila
-' default_daily_limit en security_configuration, o se retira la bandera.
+' HomeThresholds.useSystemDefault = true indica que el hogar usa esos
+' defaults; resetToDefaults() los vuelve a aplicar (limitePeriod = DAILY).
 
 
 ' ----------------------------
@@ -741,6 +840,7 @@ CheckPermission ..> SystemRolePermission : traverses
 
 Home "*" o-- "1" HomeType : uses
 Home "1" *-- "1" HomeThresholds
+HomeThresholds ..> LimitPeriod : use
 Home "1" -- "0..*" UserHome
 
 UserHome ..> User : references
@@ -777,8 +877,6 @@ Device ..> MeasurementObserver : notify
 
 AlertObserver ..> AlertFactory : uses
 
-RecommendationObserver ..> RecommendationAnalyzer : uses
-
 
 ' ----------------------------
 ' Alerts
@@ -795,13 +893,20 @@ Alert ..> Measurement : references
 ' ----------------------------
 
 Recommendation ..> RecommendationType : use
-Recommendation ..> NotificationsStatus : use
+Recommendation ..> RecommendationStatus : use
 
-RecommendationAnalyzer ..> Measurement : analyzes
-RecommendationAnalyzer ..> HomeThresholds : uses
-RecommendationAnalyzer ..> RecommendationFactory : uses
+RecommendationScheduler ..> EvaluateRecommendationsService : triggers
+EvaluateRecommendationsService ..> RecommendationRules : uses
+EvaluateRecommendationsService ..> Recommendation : creates
+EvaluateRecommendationsService ..> RecommendationCreated : publishes
+RecommendationInboxService ..> Recommendation : manages
 
-RecommendationFactory ..> Recommendation : creates
+RecommendationRules ..> Suggestion : produces
+RecommendationRules ..> HourSample : reads
+RecommendationRules ..> MonitoredDevice : reads
+RecommendationRules ..> ConsumptionLimit : reads
+ConsumptionLimit ..> Period : use
+RecommendationCreated ..> RecommendationType : use
 
 
 ' ----------------------------
@@ -816,6 +921,11 @@ Notification ..> User : recipient
 Notification ..> Home : scoped to
 
 NotificationFactory ..> Notification : creates
+
+NotificationPreference ..> Notification : defines channel
+NotificationPreference ..> User : belongs to
+PushSubscription ..> Notification : delivers to
+PushSubscription ..> User : belongs to
 NotificationFactory ..> Alert : delivers
 NotificationFactory ..> Recommendation : delivers
 NotificationFactory ..> UserConfiguration : reads channel preference
