@@ -30,14 +30,14 @@ legend top
     - Measurement
     - ConsumptionLevel
     - Alert, Recommendation
-    - Notification
+    - Notification, NotificationPreference, PushSubscription
 
     Notas:
 
-    - HomeThresholds.useSystemDefault indica si debe usarse un
-      valor por defecto. En el modelo actual dicho valor por
-      defecto no está definido en ninguna estructura persistente
-      (hueco de diseño documentado).
+    - HomeThresholds.useSystemDefault indica si el hogar usa los
+      límites por defecto del sistema (6 kWh diarios y 180 kWh
+      mensuales, configurables por el servidor). El usuario
+      responsable puede personalizarlos o volver a los defaults.
     - deliveryStatus y readAt son ciclos distintos: una alerta
       entregada no implica que esté resuelta.
 endlegend
@@ -58,6 +58,12 @@ entity HomeThresholds {
     - dailyLimit : double
     - monthlyLimit : double
     - useSystemDefault : boolean
+    - limitPeriod : LimitPeriod
+}
+
+enum LimitPeriod {
+    DAILY
+    MONTHLY
 }
 
 entity ApplianceType {
@@ -66,14 +72,17 @@ entity ApplianceType {
 
 entity Device {
     - name : String
-    - model : String
     - location : String
-    - state : String
+    - description : String
+    - installationDate : DateTime
+    - deviceCode : String
+    - apiKey : String
 }
 
 entity DeviceStatusLog {
     - status : String
-    - timestamp : DateTime
+    - signalStrength : int
+    - lastSeen : DateTime
 }
 
 entity DeviceHome {
@@ -82,8 +91,6 @@ entity DeviceHome {
 
 entity Measurement {
     - dateTime : DateTime
-    - value : double
-    - unit : String
     - voltage : double
     - current : double
     - activePower : double
@@ -107,6 +114,8 @@ entity ConsumptionLevel {
 enum AlertType {
     THRESHOLD
     CONNECTIVITY
+    DEVICE
+    LIMIT
 }
 
 enum AlertStatus {
@@ -115,10 +124,14 @@ enum AlertStatus {
 }
 
 entity Alert {
+    - homeId : String
+    - deviceId : String
     - type : AlertType
     - messageKey : String
     - dateTime : DateTime
     - alertStatus : AlertStatus
+    - consumptionLevelId : String
+    - measurementId : String
 }
 
 enum RecommendationType {
@@ -129,16 +142,18 @@ enum RecommendationType {
     THRESHOLD
 }
 
-enum NotificationsStatus {
+enum RecommendationStatus {
     READ
     UNREAD
 }
 
 entity Recommendation {
+    - homeId : String
+    - deviceId : String
     - type : RecommendationType
     - messageKey : String
     - dateTime : DateTime
-    - status : NotificationsStatus
+    - status : RecommendationStatus
 }
 
 enum NotificationChannel {
@@ -170,8 +185,22 @@ entity Notification {
     - failureReason : String
 }
 
+entity NotificationPreference {
+    - userId : String
+    - emailEnabled : boolean
+    - pushEnabled : boolean
+}
+
+entity PushSubscription {
+    - userId : String
+    - endpoint : String
+    - p256dh : String
+    - auth : String
+}
+
 Home "*" o-- "1" HomeType
 Home "1" -- "1" HomeThresholds
+HomeThresholds ..> LimitPeriod
 Home "1" -- "0..*" DeviceHome
 Device "*" o-- "1" ApplianceType
 Device "1" -- "0..*" DeviceStatusLog
@@ -183,17 +212,35 @@ ConsumptionLevel "1" -- "0..*" Alert
 Alert ..> AlertType
 Alert ..> AlertStatus
 Recommendation ..> RecommendationType
-Recommendation ..> NotificationsStatus
+Recommendation ..> RecommendationStatus
 Notification ..> NotificationChannel
 Notification ..> NotificationSourceType
 Notification ..> NotificationDeliveryStatus
+Notification ..> NotificationPreference : canal por usuario
+Notification ..> PushSubscription : push por usuario
+
+note right of Alert
+    Tipos de alerta:
+
+    - THRESHOLD: la medición cruzó a un nivel
+      de consumo HIGH o CRITICAL (lleva
+      consumptionLevelId y measurementId).
+    - CONNECTIVITY: el dispositivo dejó de
+      reportar.
+    - DEVICE: informativa, el módulo vinculado
+      envió su primera lectura tras la
+      vinculación.
+    - LIMIT: el hogar alcanzó su límite diario
+      o mensual (nivel de hogar, sin dispositivo
+      ni medición).
+end note
 
 note bottom of HomeThresholds
     Los límites son por hogar,
     no por usuario.
-    Flag useSystemDefault apunta a
-    un default no definido actualmente
-    (hueco de diseño).
+    Flag useSystemDefault indica que
+    se usan los defaults del sistema
+    (6 kWh/día, 180 kWh/mes).
 end note
 
 note right of Measurement
@@ -207,6 +254,21 @@ note right of Notification
     no el evento. Referencia Alert
     o Recommendation por
     sourceType + sourceId.
+end note
+
+note bottom of NotificationPreference
+    Una fila por usuario. Sin fila
+    se aplican los valores por
+    defecto (email y push activos).
+    El canal elegido depende de esta
+    preferencia, no de UserConfiguration.
+end note
+
+note bottom of PushSubscription
+    Un navegador suscrito a Web Push.
+    endpoint identifica la instalación;
+    p256dh y auth cifran el payload
+    (RFC 8291). Se elimina con la cuenta.
 end note
 
 @enduml
