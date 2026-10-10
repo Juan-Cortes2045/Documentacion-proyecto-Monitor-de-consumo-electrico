@@ -3,7 +3,7 @@
 title Diagrama de Dominio - Identidad, Acceso y Roles
 
 legend top
-    Diagrama de dominio de Energy Monitor.
+    Diagrama de dominio de EnergyMonitor.
 
     Propósito: modelar la identidad (Person/User), la configuración
     de la cuenta, el control de acceso por roles (doble sistema) y

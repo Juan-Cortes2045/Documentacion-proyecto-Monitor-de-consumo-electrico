@@ -3,7 +3,7 @@
 title Diagrama de Dominio - Hogar, Umbrales y Monitoreo
 
 legend top
-    Diagrama de dominio de Energy Monitor.
+    Diagrama de dominio de EnergyMonitor.
 
     Propósito: modelar el hogar (Home), sus umbrales de consumo,
     los dispositivos, las mediciones, los niveles de consumo,
